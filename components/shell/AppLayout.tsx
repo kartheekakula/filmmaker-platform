@@ -9,9 +9,14 @@ import { X } from "lucide-react";
 interface AppLayoutProps {
   title?: string;
   children: React.ReactNode;
+  maxWidth?: string;
 }
 
-export function AppLayout({ title = "Home", children }: AppLayoutProps) {
+export function AppLayout({
+  title = "Home",
+  children,
+  maxWidth,
+}: AppLayoutProps) {
   const [drawerOpen, setDrawerOpen] = useState(false);
 
   // Close drawer on Escape key
@@ -85,8 +90,8 @@ export function AppLayout({ title = "Home", children }: AppLayoutProps) {
         {/* Top Bar */}
         <TopBar title={title} onOpenDrawer={() => setDrawerOpen(true)} />
 
-        {/* Centered Feed / Page Content Column (max 680px) */}
-        <main className="flex-1 w-full max-w-[680px] mx-auto px-4 py-4 pb-20">
+        {/* Centered Feed / Page Content Column */}
+        <main className={`flex-1 w-full ${maxWidth ?? "max-w-[680px]"} mx-auto px-4 py-4 pb-20`}>
           {children}
         </main>
 

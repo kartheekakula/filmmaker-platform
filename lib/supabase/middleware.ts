@@ -40,8 +40,26 @@ export async function updateSession(request: NextRequest) {
     },
   });
 
-  // Refresh auth token
-  await supabase.auth.getUser();
+  // Refresh auth token and check user
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  const pathname = request.nextUrl.pathname;
+  const isProtected =
+    pathname.startsWith("/settings") ||
+    pathname.startsWith("/onboarding") ||
+    pathname === "/post";
+
+  if (isProtected && !user) {
+    const loginUrl = new URL("/login", request.url);
+    loginUrl.searchParams.set("next", pathname);
+    return NextResponse.redirect(loginUrl);
+  }
+
+  if (pathname === "/login" && user) {
+    return NextResponse.redirect(new URL("/", request.url));
+  }
 
   return supabaseResponse;
 }
