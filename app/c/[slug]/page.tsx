@@ -1,7 +1,7 @@
 import { AppLayout } from "@/components/shell/AppLayout";
 import { FeedList } from "@/components/feed/FeedList";
 import { createClient } from "@/lib/supabase/server";
-import { getFilmsFeed } from "@/lib/films";
+import { getFilmsFeed, FeedResponse } from "@/lib/films";
 import { CATEGORIES } from "@/lib/constants";
 
 interface ChannelPageProps {
@@ -25,7 +25,7 @@ export default async function ChannelPage({ params }: ChannelPageProps) {
         .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
         .join(" ");
 
-  let feedData = {
+  let feedData: FeedResponse = {
     films: [],
     nextCursor: null,
     hasMore: false,

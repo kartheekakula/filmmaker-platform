@@ -2,6 +2,7 @@ import { AppLayout } from "@/components/shell/AppLayout";
 import { FeedList } from "@/components/feed/FeedList";
 import { createClient } from "@/lib/supabase/server";
 import { getPopularFilms } from "@/lib/films";
+import { FilmWithCreator } from "@/lib/types";
 
 export default async function PopularPage() {
   const supabase = await createClient();
@@ -9,7 +10,7 @@ export default async function PopularPage() {
     data: { user },
   } = await supabase.auth.getUser();
 
-  let popularData = {
+  let popularData: { films: FilmWithCreator[]; hasMore: boolean } = {
     films: [],
     hasMore: false,
   };

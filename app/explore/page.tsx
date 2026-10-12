@@ -1,7 +1,7 @@
 import { AppLayout } from "@/components/shell/AppLayout";
 import { FeedList } from "@/components/feed/FeedList";
 import { createClient } from "@/lib/supabase/server";
-import { getExploreFilms } from "@/lib/films";
+import { getExploreFilms, FeedResponse } from "@/lib/films";
 
 export default async function ExplorePage() {
   const supabase = await createClient();
@@ -9,7 +9,7 @@ export default async function ExplorePage() {
     data: { user },
   } = await supabase.auth.getUser();
 
-  let exploreData = {
+  let exploreData: FeedResponse = {
     films: [],
     nextCursor: null,
     hasMore: false,
