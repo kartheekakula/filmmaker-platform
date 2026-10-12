@@ -62,3 +62,13 @@ body {
 ::-webkit-scrollbar-thumb:hover {
   background: #3d4040;
 }
+
+@keyframes previewProgress {
+  0% {
+    width: 0%;
+  }
+  100% {
+    width: 100%;
+  }
+}
+
