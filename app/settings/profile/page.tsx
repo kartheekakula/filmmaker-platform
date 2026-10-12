@@ -6,7 +6,13 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { resizeImage } from "@/lib/utils/image";
 import { AppLayout } from "@/components/shell/AppLayout";
-import type { Profile, ProfileExperience } from "@/lib/types";
+import type { Profile, ProfileExperience, Film } from "@/lib/types";
+import {
+  getUserFilms,
+  getFeaturedFilms,
+  updateFeaturedFilms,
+  formatDuration,
+} from "@/lib/films";
 import {
   Upload,
   Plus,
@@ -16,6 +22,7 @@ import {
   ArrowLeft,
   X,
   ExternalLink,
+  Film as FilmIcon,
 } from "lucide-react";
 
 export default function EditProfilePage() {
@@ -30,6 +37,8 @@ export default function EditProfilePage() {
   const [userId, setUserId] = useState<string | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [experiences, setExperiences] = useState<ProfileExperience[]>([]);
+  const [userFilms, setUserFilms] = useState<Film[]>([]);
+  const [featuredFilmIds, setFeaturedFilmIds] = useState<string[]>([]);
 
   // Form Fields
   const [displayName, setDisplayName] = useState("");
@@ -117,6 +126,13 @@ export default function EditProfilePage() {
       if (exp) {
         setExperiences(exp as ProfileExperience[]);
       }
+
+      // Fetch user films and featured films
+      const films = await getUserFilms(supabase, user.id, 50);
+      setUserFilms(films);
+
+      const featured = await getFeaturedFilms(supabase, user.id);
+      setFeaturedFilmIds(featured.map((f) => f.film_id));
 
       setLoading(false);
     }
@@ -235,6 +251,9 @@ export default function EditProfilePage() {
       }).eq("id", userId);
 
       if (error) throw error;
+
+      // Update featured films
+      await updateFeaturedFilms(supabase, userId, featuredFilmIds);
 
       setSuccessMessage("Profile saved successfully.");
       setTimeout(() => setSuccessMessage(""), 3500);
@@ -744,6 +763,109 @@ export default function EditProfilePage() {
               placeholder="e.g. Screenwriting, Colour Grading, Sound Design (press Enter)"
               className="w-full bg-[#1A1C1C] border border-[#303232] px-3 py-1.5 text-xs text-[#E6E6E6] focus:outline-none focus:border-[#6C86FF] transition-colors rounded-none"
             />
+          </section>
+
+          {/* Section: Featured Microfilms (Pick up to 3) */}
+          <section className="bg-[#232525] border border-[#303232] p-5 space-y-4 rounded-none">
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-xs uppercase tracking-wider font-semibold text-[#878787]">
+                  Featured Microfilms
+                </h2>
+                <p className="text-[11px] text-[#A8A8A8]">
+                  Pick up to 3 films to showcase prominently on your public profile.
+                </p>
+              </div>
+              <span className="text-xs font-mono text-[#6C86FF]">
+                {featuredFilmIds.length} / 3 selected
+              </span>
+            </div>
+
+            {userFilms.length === 0 ? (
+              <div className="py-6 text-center border border-dashed border-[#303232] space-y-2">
+                <FilmIcon size={20} strokeWidth={1.5} className="mx-auto text-[#878787]" />
+                <p className="text-xs text-[#878787]">You haven&apos;t published any microfilms yet.</p>
+                <Link
+                  href="/post"
+                  className="inline-block text-xs font-semibold text-[#6C86FF] hover:underline uppercase"
+                >
+                  Publish a microfilm
+                </Link>
+              </div>
+            ) : (
+              <div className="space-y-2">
+                {userFilms.map((film) => {
+                  const isSelected = featuredFilmIds.includes(film.id);
+                  const position = featuredFilmIds.indexOf(film.id) + 1;
+
+                  return (
+                    <div
+                      key={film.id}
+                      className={`flex items-center justify-between p-3 border transition-colors ${
+                        isSelected
+                          ? "bg-[#0B1A4A] border-[#6C86FF]/50"
+                          : "bg-[#1A1C1C] border-[#303232]"
+                      }`}
+                    >
+                      <div className="flex items-center space-x-3 min-w-0 pr-2">
+                        <div className="w-12 h-8 bg-[#000000] border border-[#303232] shrink-0 overflow-hidden relative">
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img
+                            src={
+                              film.thumbnail_url ||
+                              `https://img.youtube.com/vi/${film.youtube_id}/hqdefault.jpg`
+                            }
+                            alt={film.title}
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+                        <div className="min-w-0">
+                          <p className="text-xs font-semibold text-[#E6E6E6] truncate">
+                            {film.title}
+                          </p>
+                          <p className="text-[11px] font-mono text-[#878787] truncate">
+                            {formatDuration(film.duration_seconds)} • c/{film.category_slug}
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center space-x-2 shrink-0">
+                        {isSelected && (
+                          <span className="px-2 py-0.5 bg-[#002EC1] text-[#E6E6E6] text-[10px] font-mono font-bold">
+                            #{position}
+                          </span>
+                        )}
+                        <button
+                          type="button"
+                          onClick={() => {
+                            if (isSelected) {
+                              setFeaturedFilmIds(
+                                featuredFilmIds.filter((id) => id !== film.id)
+                              );
+                            } else {
+                              if (featuredFilmIds.length >= 3) {
+                                setErrorMessage(
+                                  "You can only feature up to 3 microfilms."
+                                );
+                                return;
+                              }
+                              setFeaturedFilmIds([...featuredFilmIds, film.id]);
+                            }
+                          }}
+                          className={`px-3 py-1 text-xs font-semibold border transition-colors ${
+                            isSelected
+                              ? "bg-[#2E3030] border-[#303232] text-[#E6E6E6] hover:text-red-400"
+                              : "bg-[#002EC1] border-transparent text-[#E6E6E6] hover:bg-[#1F4BE0]"
+                          }`}
+                        >
+                          {isSelected ? "Remove" : "Feature"}
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
           </section>
 
           {/* Submit Button */}

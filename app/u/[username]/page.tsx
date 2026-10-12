@@ -3,7 +3,8 @@ import type { Metadata } from "next";
 import { createClient } from "@/lib/supabase/server";
 import { AppLayout } from "@/components/shell/AppLayout";
 import { ProfileView } from "@/components/profile/ProfileView";
-import type { Profile, ProfileExperience } from "@/lib/types";
+import type { Profile, ProfileExperience, Film } from "@/lib/types";
+import { getFeaturedFilms, getUserFilms } from "@/lib/films";
 
 interface ProfilePageProps {
   params: Promise<{
@@ -59,7 +60,15 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
     .eq("profile_id", profile.id)
     .order("start_year", { ascending: false });
 
-  // 3. Current Authenticated User & Follow Status
+  // 3. Fetch Featured Films & Activity Films
+  const featuredRecords = await getFeaturedFilms(supabase, profile.id);
+  const featuredFilms = featuredRecords
+    .map((r) => r.films)
+    .filter(Boolean) as Film[];
+
+  const activityFilms = await getUserFilms(supabase, profile.id, 5);
+
+  // 4. Current Authenticated User & Follow Status
   const {
     data: { user: currentUser },
   } = await supabase.auth.getUser();
@@ -88,7 +97,10 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
         experience={(experienceData ?? []) as ProfileExperience[]}
         initialIsFollowing={initialIsFollowing}
         currentUserId={currentUser?.id ?? null}
+        featuredFilms={featuredFilms}
+        activityFilms={activityFilms}
       />
     </AppLayout>
   );
 }
+

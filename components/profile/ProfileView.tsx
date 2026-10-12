@@ -1,15 +1,19 @@
 "use client";
 
 import React, { useState } from "react";
-import type { Profile, ProfileExperience } from "@/lib/types";
+import Link from "next/link";
+import type { Profile, ProfileExperience, Film } from "@/lib/types";
+import { formatDuration } from "@/lib/films";
 import { FollowButton } from "./FollowButton";
-import { MapPin, Globe, Film, Sparkles, ExternalLink } from "lucide-react";
+import { MapPin, Globe, Film as FilmIcon, Sparkles, ExternalLink } from "lucide-react";
 
 interface ProfileViewProps {
   profile: Profile;
   experience: ProfileExperience[];
   initialIsFollowing: boolean;
   currentUserId: string | null;
+  featuredFilms?: Film[];
+  activityFilms?: Film[];
 }
 
 export function ProfileView({
@@ -17,6 +21,8 @@ export function ProfileView({
   experience,
   initialIsFollowing,
   currentUserId,
+  featuredFilms = [],
+  activityFilms = [],
 }: ProfileViewProps) {
   const [followerCount, setFollowerCount] = useState(profile.follower_count ?? 0);
 
@@ -189,28 +195,115 @@ export function ProfileView({
         )}
       </section>
 
-      {/* 4. Featured Section (empty state for M1) */}
-      <section className="bg-[#232525] border border-[#303232] p-5 space-y-3 rounded-none">
-        <h2 className="text-xs uppercase tracking-wider font-semibold text-[#878787]">
-          Featured
-        </h2>
-        <div className="py-6 text-center border border-dashed border-[#303232]">
-          <Film size={20} strokeWidth={1.5} className="mx-auto text-[#878787] mb-2" />
-          <p className="text-xs text-[#A8A8A8]">No featured microfilms yet.</p>
-          <p className="text-[11px] text-[#878787] mt-0.5">
-            Microfilms can be featured in Milestone 2.
-          </p>
+      {/* 4. Featured Section */}
+      <section className="bg-[#232525] border border-[#303232] p-5 space-y-4 rounded-none">
+        <div className="flex items-center justify-between">
+          <h2 className="text-xs uppercase tracking-wider font-semibold text-[#878787]">
+            Featured
+          </h2>
+          {currentUserId === profile.id && (
+            <Link
+              href="/settings/profile"
+              className="text-[11px] font-mono text-[#6C86FF] hover:underline"
+            >
+              Edit featured
+            </Link>
+          )}
         </div>
+
+        {featuredFilms && featuredFilms.length > 0 ? (
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            {featuredFilms.map((film) => (
+              <Link
+                key={film.id}
+                href={`/f/${film.id}`}
+                className="group block bg-[#1A1C1C] border border-[#303232] hover:border-[#6C86FF]/50 transition-colors overflow-hidden"
+              >
+                <div className="relative aspect-video w-full bg-[#000000] overflow-hidden">
+                  <img
+                    src={film.thumbnail_url || `https://img.youtube.com/vi/${film.youtube_id}/hqdefault.jpg`}
+                    alt={film.title}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                  />
+                  <div className="absolute bottom-1.5 right-1.5 px-1 py-0.5 bg-[#000000]/80 text-[10px] font-mono text-[#E6E6E6]">
+                    {formatDuration(film.duration_seconds)}
+                  </div>
+                </div>
+                <div className="p-2.5 space-y-1">
+                  <h3 className="text-xs font-semibold text-[#E6E6E6] group-hover:text-[#6C86FF] transition-colors truncate">
+                    {film.title}
+                  </h3>
+                  <p className="text-[11px] font-mono text-[#878787] truncate">
+                    c/{film.category_slug} • {film.like_count || 0} likes
+                  </p>
+                </div>
+              </Link>
+            ))}
+          </div>
+        ) : (
+          <div className="py-6 text-center border border-dashed border-[#303232] space-y-1">
+            <FilmIcon size={20} strokeWidth={1.5} className="mx-auto text-[#878787] mb-1" />
+            <p className="text-xs text-[#A8A8A8]">No featured microfilms yet.</p>
+            {currentUserId === profile.id && (
+              <Link
+                href="/settings/profile"
+                className="inline-block text-[11px] font-semibold text-[#6C86FF] hover:underline mt-1"
+              >
+                Feature films on your profile
+              </Link>
+            )}
+          </div>
+        )}
       </section>
 
-      {/* 5. Activity Section (empty state for M1) */}
-      <section className="bg-[#232525] border border-[#303232] p-5 space-y-3 rounded-none">
-        <h2 className="text-xs uppercase tracking-wider font-semibold text-[#878787]">
-          Activity
-        </h2>
-        <div className="py-6 text-center border border-dashed border-[#303232]">
-          <p className="text-xs text-[#A8A8A8]">No recent film activity yet.</p>
+      {/* 5. Activity Section */}
+      <section className="bg-[#232525] border border-[#303232] p-5 space-y-4 rounded-none">
+        <div className="flex items-center justify-between">
+          <h2 className="text-xs uppercase tracking-wider font-semibold text-[#878787]">
+            Activity
+          </h2>
+          <span className="text-[11px] font-mono text-[#878787]">
+            Latest uploads
+          </span>
         </div>
+
+        {activityFilms && activityFilms.length > 0 ? (
+          <div className="space-y-2">
+            {activityFilms.map((film) => (
+              <Link
+                key={film.id}
+                href={`/f/${film.id}`}
+                className="flex items-center justify-between p-2.5 bg-[#1A1C1C] border border-[#303232] hover:border-[#6C86FF]/50 transition-colors group"
+              >
+                <div className="flex items-center space-x-3 min-w-0 pr-2">
+                  <div className="w-14 h-9 bg-[#000000] shrink-0 overflow-hidden relative border border-[#303232]">
+                    <img
+                      src={film.thumbnail_url || `https://img.youtube.com/vi/${film.youtube_id}/hqdefault.jpg`}
+                      alt={film.title}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                  <div className="min-w-0">
+                    <h3 className="text-xs font-semibold text-[#E6E6E6] group-hover:text-[#6C86FF] transition-colors truncate">
+                      {film.title}
+                    </h3>
+                    <p className="text-[11px] font-mono text-[#878787] truncate">
+                      {formatDuration(film.duration_seconds)} • c/{film.category_slug}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="text-[11px] font-mono text-[#878787] shrink-0 text-right">
+                  <div>{film.like_count || 0} likes</div>
+                </div>
+              </Link>
+            ))}
+          </div>
+        ) : (
+          <div className="py-6 text-center border border-dashed border-[#303232]">
+            <p className="text-xs text-[#A8A8A8]">No recent film activity yet.</p>
+          </div>
+        )}
       </section>
 
       {/* 6. Experience Section */}
