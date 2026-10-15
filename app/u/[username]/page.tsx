@@ -27,13 +27,13 @@ export async function generateMetadata({
 
   if (!profile) {
     return {
-      title: "Profile Not Found | Filmmaker Platform",
+      title: "Profile Not Found | Arkee",
     };
   }
 
   return {
-    title: `${profile.display_name || profile.username} (@${profile.username}) | Filmmaker Platform`,
-    description: profile.headline || `Filmmaker profile of @${profile.username}`,
+    title: `${profile.display_name || profile.username} (@${profile.username}) | Arkee`,
+    description: profile.headline || `Artist profile of @${profile.username}`,
   };
 }
 

@@ -199,13 +199,13 @@ export default function OnboardingPage() {
 
   return (
     <div className="min-h-screen bg-[#000000] flex items-center justify-center p-4">
-      <div className="w-full max-w-md bg-[#232525] border border-[#303232] p-6 space-y-6 rounded-none">
+      <div className="w-full max-w-md bg-[#232525] border border-[#303232] p-6 space-y-6 rounded-2xl shadow-2xl">
         <div className="space-y-1">
           <span className="font-display text-xl tracking-wider text-[#E6E6E6]">
             BUILD YOUR PROFILE
           </span>
           <p className="text-xs text-[#A8A8A8]">
-            Set up your filmmaker identity to start publishing and collaborating.
+            Set up your artist profile to start publishing and collaborating.
           </p>
         </div>
 
@@ -221,7 +221,7 @@ export default function OnboardingPage() {
               value={displayName}
               onChange={(e) => setDisplayName(e.target.value)}
               placeholder="e.g. Tarun Bhascker"
-              className="w-full bg-[#1A1C1C] border border-[#303232] px-3 py-2 text-sm text-[#E6E6E6] placeholder-[#878787] focus:outline-none focus:border-[#6C86FF] transition-colors rounded-none"
+              className="w-full bg-[#1A1C1C] border border-[#303232] px-3.5 py-2 text-sm text-[#E6E6E6] placeholder-[#878787] focus:outline-none focus:border-[#6C86FF] transition-colors rounded-xl"
             />
           </div>
 
@@ -242,7 +242,7 @@ export default function OnboardingPage() {
               )}
             </div>
             <div className="relative">
-              <span className="absolute left-3 top-2 text-sm text-[#878787]">
+              <span className="absolute left-3.5 top-2.5 text-sm text-[#878787]">
                 @
               </span>
               <input
@@ -251,7 +251,7 @@ export default function OnboardingPage() {
                 value={username}
                 onChange={(e) => setUsername(e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, ""))}
                 placeholder="username"
-                className="w-full bg-[#1A1C1C] border border-[#303232] pl-7 pr-3 py-2 text-sm text-[#E6E6E6] placeholder-[#878787] focus:outline-none focus:border-[#6C86FF] transition-colors rounded-none"
+                className="w-full bg-[#1A1C1C] border border-[#303232] pl-8 pr-3.5 py-2 text-sm text-[#E6E6E6] placeholder-[#878787] focus:outline-none focus:border-[#6C86FF] transition-colors rounded-xl font-mono"
               />
             </div>
             {usernameError && (
@@ -269,8 +269,8 @@ export default function OnboardingPage() {
               required
               value={headline}
               onChange={(e) => setHeadline(e.target.value)}
-              placeholder="e.g. Writer & Director | Microfilm Creator"
-              className="w-full bg-[#1A1C1C] border border-[#303232] px-3 py-2 text-sm text-[#E6E6E6] placeholder-[#878787] focus:outline-none focus:border-[#6C86FF] transition-colors rounded-none"
+              placeholder="e.g. Writer & Visual Storyteller | Motion Specialist"
+              className="w-full bg-[#1A1C1C] border border-[#303232] px-3.5 py-2 text-sm text-[#E6E6E6] placeholder-[#878787] focus:outline-none focus:border-[#6C86FF] transition-colors rounded-xl"
             />
           </div>
 
@@ -284,7 +284,7 @@ export default function OnboardingPage() {
               value={location}
               onChange={(e) => setLocation(e.target.value)}
               placeholder="e.g. Hyderabad, Telangana"
-              className="w-full bg-[#1A1C1C] border border-[#303232] px-3 py-2 text-sm text-[#E6E6E6] placeholder-[#878787] focus:outline-none focus:border-[#6C86FF] transition-colors rounded-none"
+              className="w-full bg-[#1A1C1C] border border-[#303232] px-3.5 py-2 text-sm text-[#E6E6E6] placeholder-[#878787] focus:outline-none focus:border-[#6C86FF] transition-colors rounded-xl"
             />
           </div>
 
@@ -301,7 +301,7 @@ export default function OnboardingPage() {
                     key={lang}
                     type="button"
                     onClick={() => toggleLanguage(lang)}
-                    className={`px-2.5 py-1 text-xs border transition-colors rounded-none ${
+                    className={`px-3 py-1 text-xs border transition-colors rounded-full ${
                       isSelected
                         ? "bg-[#0B1A4A] border-[#6C86FF] text-[#E6E6E6]"
                         : "bg-[#1A1C1C] border-[#303232] text-[#A8A8A8] hover:text-[#E6E6E6]"
@@ -318,7 +318,7 @@ export default function OnboardingPage() {
               onChange={(e) => setCustomLanguage(e.target.value)}
               onKeyDown={addCustomLanguage}
               placeholder="Type other language and press Enter"
-              className="w-full bg-[#1A1C1C] border border-[#303232] px-3 py-1.5 text-xs text-[#E6E6E6] placeholder-[#878787] focus:outline-none focus:border-[#6C86FF] transition-colors rounded-none"
+              className="w-full bg-[#1A1C1C] border border-[#303232] px-3.5 py-2 text-xs text-[#E6E6E6] placeholder-[#878787] focus:outline-none focus:border-[#6C86FF] transition-colors rounded-xl"
             />
           </div>
 
@@ -329,7 +329,7 @@ export default function OnboardingPage() {
           <button
             type="submit"
             disabled={submitting || usernameStatus === "taken" || usernameStatus === "invalid"}
-            className="w-full bg-[#002EC1] hover:bg-[#1F4BE0] active:bg-[#0021A0] text-[#E6E6E6] py-2.5 text-sm font-semibold transition-colors rounded-none disabled:opacity-50"
+            className="w-full bg-[#002EC1] hover:bg-[#1F4BE0] active:bg-[#0021A0] text-[#E6E6E6] py-3 text-sm font-semibold transition-all duration-200 rounded-xl disabled:opacity-50 cursor-pointer shadow-md hover:shadow-lg active:scale-[0.99]"
           >
             {submitting ? "Saving profile..." : "Complete profile"}
           </button>

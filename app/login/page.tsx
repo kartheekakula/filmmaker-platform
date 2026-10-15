@@ -39,23 +39,23 @@ function LoginForm() {
   };
 
   return (
-    <div className="w-full max-w-sm bg-[#232525] border border-[#303232] p-8 space-y-6 rounded-none">
+    <div className="w-full max-w-sm bg-[#232525] border border-[#303232] p-8 space-y-6 rounded-2xl shadow-2xl">
       {/* Brand Header */}
       <div className="space-y-1.5 text-center">
         <Link
           href="/"
           className="font-display text-3xl tracking-wider text-[#E6E6E6] hover:text-[#6C86FF] transition-colors inline-block"
         >
-          FILMMAKER
+          ARKEE
         </Link>
         <p className="text-xs text-[#A8A8A8] leading-relaxed">
-          Sign in with your Google account to publish microfilms, follow creators, and build your creative portfolio.
+          Sign in with your Google account to publish artwork, connect with artists, and showcase your creative portfolio.
         </p>
       </div>
 
       {/* Error Alert */}
       {errorMessage && (
-        <div className="p-3 bg-[#0B1A4A] border border-[#6C86FF]/50 text-xs text-[#E6E6E6] flex items-start space-x-2">
+        <div className="p-3 bg-[#0B1A4A] border border-[#6C86FF]/50 text-xs text-[#E6E6E6] flex items-start space-x-2 rounded-xl">
           <AlertCircle className="w-4 h-4 text-[#6C86FF] shrink-0 mt-0.5" />
           <span>{errorMessage}</span>
         </div>
@@ -67,7 +67,7 @@ function LoginForm() {
           type="button"
           onClick={handleGoogleSignIn}
           disabled={oauthLoading}
-          className="w-full flex items-center justify-center space-x-3 py-3 px-4 bg-[#002EC1] hover:bg-[#1F4BE0] active:bg-[#0021A0] text-[#E6E6E6] text-xs font-semibold uppercase tracking-wider transition-colors rounded-none disabled:opacity-50"
+          className="w-full flex items-center justify-center space-x-3 py-3 px-4 bg-[#002EC1] hover:bg-[#1F4BE0] active:bg-[#0021A0] text-[#E6E6E6] text-xs font-semibold uppercase tracking-wider transition-all duration-200 rounded-xl disabled:opacity-50 cursor-pointer shadow-md hover:shadow-lg active:scale-[0.99]"
         >
           <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24">
             <path
@@ -109,7 +109,7 @@ export default function LoginPage() {
     <div className="min-h-screen bg-[#000000] flex items-center justify-center p-4">
       <Suspense
         fallback={
-          <div className="w-full max-w-sm bg-[#232525] border border-[#303232] p-8 text-center text-xs text-[#878787]">
+          <div className="w-full max-w-sm bg-[#232525] border border-[#303232] p-8 text-center text-xs text-[#878787] rounded-2xl">
             Loading sign in...
           </div>
         }

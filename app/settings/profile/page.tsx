@@ -48,15 +48,6 @@ export default function EditProfilePage() {
   const [languages, setLanguages] = useState<string[]>([]);
   const [languageInput, setLanguageInput] = useState("");
 
-  const [favDialogue, setFavDialogue] = useState("");
-  const [favDialogueSource, setFavDialogueSource] = useState("");
-
-  const [favFilmmakers, setFavFilmmakers] = useState<string[]>([]);
-  const [filmmakerInput, setFilmmakerInput] = useState("");
-
-  const [favGenres, setFavGenres] = useState<string[]>([]);
-  const [genreInput, setGenreInput] = useState("");
-
   const [skills, setSkills] = useState<string[]>([]);
   const [skillInput, setSkillInput] = useState("");
 
@@ -107,10 +98,6 @@ export default function EditProfilePage() {
         setBio(p.bio || "");
         setLocation(p.location || "");
         setLanguages(p.languages || []);
-        setFavDialogue(p.fav_dialogue || "");
-        setFavDialogueSource(p.fav_dialogue_source || "");
-        setFavFilmmakers(p.fav_filmmakers || []);
-        setFavGenres(p.fav_genres || []);
         setSkills(p.skills || []);
         setAvatarUrl(p.avatar_url || null);
         setBannerUrl(p.banner_url || null);
@@ -225,11 +212,6 @@ export default function EditProfilePage() {
     e.preventDefault();
     if (!userId) return;
 
-    if (favDialogue.length > 200) {
-      setErrorMessage("Favourite dialogue cannot exceed 200 characters.");
-      return;
-    }
-
     setSaving(true);
     setErrorMessage("");
     setSuccessMessage("");
@@ -241,10 +223,10 @@ export default function EditProfilePage() {
         bio: bio.trim() || null,
         location: location.trim() || null,
         languages,
-        fav_dialogue: favDialogue.trim() || null,
-        fav_dialogue_source: favDialogueSource.trim() || null,
-        fav_filmmakers: favFilmmakers.slice(0, 5),
-        fav_genres: favGenres.slice(0, 5),
+        fav_dialogue: null,
+        fav_dialogue_source: null,
+        fav_filmmakers: [],
+        fav_genres: [],
         skills,
         avatar_url: avatarUrl,
         banner_url: bannerUrl,
@@ -391,19 +373,19 @@ export default function EditProfilePage() {
 
         {/* Global Notifications */}
         {successMessage && (
-          <div className="bg-[#0B1A4A] border border-[#6C86FF] px-4 py-2.5 text-xs text-[#E6E6E6] rounded-none">
+          <div className="bg-[#0B1A4A] border border-[#6C86FF] px-4 py-3 text-xs text-[#E6E6E6] rounded-xl shadow-md">
             {successMessage}
           </div>
         )}
         {errorMessage && (
-          <div className="bg-[#2A1010] border border-[#ff6c6c] px-4 py-2.5 text-xs text-[#ff6c6c] rounded-none">
+          <div className="bg-[#2A1010] border border-[#ff6c6c] px-4 py-3 text-xs text-[#ff6c6c] rounded-xl shadow-md">
             {errorMessage}
           </div>
         )}
 
         <form onSubmit={handleSaveProfile} className="space-y-6">
           {/* Section: Images (Banner & Avatar) */}
-          <section className="bg-[#232525] border border-[#303232] p-5 space-y-4 rounded-none">
+          <section className="bg-[#232525] border border-[#303232] p-6 space-y-5 rounded-2xl shadow-lg">
             <h2 className="text-xs uppercase tracking-wider font-semibold text-[#878787]">
               Profile Images
             </h2>
@@ -413,7 +395,7 @@ export default function EditProfilePage() {
               <label className="block text-xs font-medium text-[#A8A8A8]">
                 Banner image (max 4 MB)
               </label>
-              <div className="w-full h-32 bg-[#002EC1] relative overflow-hidden flex items-center justify-center border border-[#303232]">
+              <div className="w-full h-36 bg-[#002EC1] relative overflow-hidden flex items-center justify-center border border-[#303232] rounded-xl">
                 {bannerUrl && (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img
@@ -447,7 +429,7 @@ export default function EditProfilePage() {
                 Avatar image (max 2 MB)
               </label>
               <div className="flex items-center space-x-4">
-                <div className="w-20 h-20 bg-[#002EC1] border border-[#303232] overflow-hidden flex items-center justify-center text-2xl font-bold text-[#E6E6E6] rounded-none">
+                <div className="w-20 h-20 bg-[#002EC1] border-2 border-[#303232] overflow-hidden flex items-center justify-center text-2xl font-bold text-[#E6E6E6] rounded-full shadow-md">
                   {avatarUrl ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img
@@ -456,7 +438,7 @@ export default function EditProfilePage() {
                       className="w-full h-full object-cover"
                     />
                   ) : (
-                    (displayName[0] || "U").toUpperCase()
+                    (displayName[0] || "A").toUpperCase()
                   )}
                 </div>
 
@@ -464,7 +446,7 @@ export default function EditProfilePage() {
                   type="button"
                   onClick={() => avatarInputRef.current?.click()}
                   disabled={uploadingAvatar}
-                  className="px-3.5 py-2 text-xs font-medium bg-[#2E3030] hover:bg-[#383a3a] text-[#E6E6E6] border border-[#303232] transition-colors rounded-none flex items-center space-x-1.5"
+                  className="px-4 py-2 text-xs font-medium bg-[#2B2D2D] hover:bg-[#353838] text-[#E6E6E6] border border-[#303232] transition-colors rounded-xl flex items-center space-x-1.5 cursor-pointer shadow-sm hover:shadow"
                 >
                   <Upload size={14} strokeWidth={1.5} />
                   <span>{uploadingAvatar ? "Uploading..." : "Change avatar"}</span>
@@ -481,7 +463,7 @@ export default function EditProfilePage() {
           </section>
 
           {/* Section: Basic Information */}
-          <section className="bg-[#232525] border border-[#303232] p-5 space-y-4 rounded-none">
+          <section className="bg-[#232525] border border-[#303232] p-6 space-y-4 rounded-2xl shadow-lg">
             <h2 className="text-xs uppercase tracking-wider font-semibold text-[#878787]">
               Basic Info
             </h2>
@@ -495,7 +477,7 @@ export default function EditProfilePage() {
                 required
                 value={displayName}
                 onChange={(e) => setDisplayName(e.target.value)}
-                className="w-full bg-[#1A1C1C] border border-[#303232] px-3 py-2 text-sm text-[#E6E6E6] focus:outline-none focus:border-[#6C86FF] transition-colors rounded-none"
+                className="w-full bg-[#1A1C1C] border border-[#303232] px-3.5 py-2 text-sm text-[#E6E6E6] focus:outline-none focus:border-[#6C86FF] transition-colors rounded-xl"
               />
             </div>
 
@@ -508,8 +490,8 @@ export default function EditProfilePage() {
                 required
                 value={headline}
                 onChange={(e) => setHeadline(e.target.value)}
-                placeholder="e.g. Writer & Cinematographer | Microfilm Specialist"
-                className="w-full bg-[#1A1C1C] border border-[#303232] px-3 py-2 text-sm text-[#E6E6E6] focus:outline-none focus:border-[#6C86FF] transition-colors rounded-none"
+                placeholder="e.g. Writer & Visual Storyteller | Motion Specialist"
+                className="w-full bg-[#1A1C1C] border border-[#303232] px-3.5 py-2 text-sm text-[#E6E6E6] focus:outline-none focus:border-[#6C86FF] transition-colors rounded-xl"
               />
             </div>
 
@@ -521,8 +503,8 @@ export default function EditProfilePage() {
                 rows={4}
                 value={bio}
                 onChange={(e) => setBio(e.target.value)}
-                placeholder="Tell others about your filmmaking background and vision..."
-                className="w-full bg-[#1A1C1C] border border-[#303232] px-3 py-2 text-sm text-[#E6E6E6] focus:outline-none focus:border-[#6C86FF] transition-colors rounded-none"
+                placeholder="Tell others about your creative craft, artistic background, and vision..."
+                className="w-full bg-[#1A1C1C] border border-[#303232] px-3.5 py-2 text-sm text-[#E6E6E6] focus:outline-none focus:border-[#6C86FF] transition-colors rounded-xl"
               />
             </div>
 
@@ -535,7 +517,7 @@ export default function EditProfilePage() {
                 value={location}
                 onChange={(e) => setLocation(e.target.value)}
                 placeholder="e.g. Hyderabad, India"
-                className="w-full bg-[#1A1C1C] border border-[#303232] px-3 py-2 text-sm text-[#E6E6E6] focus:outline-none focus:border-[#6C86FF] transition-colors rounded-none"
+                className="w-full bg-[#1A1C1C] border border-[#303232] px-3.5 py-2 text-sm text-[#E6E6E6] focus:outline-none focus:border-[#6C86FF] transition-colors rounded-xl"
               />
             </div>
 
@@ -548,13 +530,13 @@ export default function EditProfilePage() {
                 {languages.map((lang, idx) => (
                   <span
                     key={idx}
-                    className="inline-flex items-center space-x-1 px-2.5 py-1 text-xs bg-[#1A1C1C] border border-[#303232] text-[#E6E6E6] rounded-none"
+                    className="inline-flex items-center space-x-1 px-3 py-1 text-xs bg-[#1A1C1C] border border-[#303232] text-[#E6E6E6] rounded-full"
                   >
                     <span>{lang}</span>
                     <button
                       type="button"
                       onClick={() => setLanguages(languages.filter((_, i) => i !== idx))}
-                      className="text-[#878787] hover:text-[#E6E6E6]"
+                      className="text-[#878787] hover:text-[#E6E6E6] cursor-pointer"
                     >
                       <X size={12} />
                     </button>
@@ -576,157 +558,14 @@ export default function EditProfilePage() {
                     }
                   }}
                   placeholder="Add language and press Enter"
-                  className="flex-1 bg-[#1A1C1C] border border-[#303232] px-3 py-1.5 text-xs text-[#E6E6E6] focus:outline-none focus:border-[#6C86FF] transition-colors rounded-none"
+                  className="flex-1 bg-[#1A1C1C] border border-[#303232] px-3.5 py-2 text-xs text-[#E6E6E6] focus:outline-none focus:border-[#6C86FF] transition-colors rounded-xl"
                 />
               </div>
-            </div>
-          </section>
-
-          {/* Section: Favourite Dialogue (Max 200) */}
-          <section className="bg-[#232525] border border-[#303232] p-5 space-y-4 rounded-none">
-            <div className="flex items-center justify-between">
-              <h2 className="text-xs uppercase tracking-wider font-semibold text-[#878787]">
-                Favourite Dialogue (Pinned Quote)
-              </h2>
-              <span className={`text-[11px] font-mono ${
-                favDialogue.length > 200 ? "text-[#ff6c6c]" : "text-[#878787]"
-              }`}>
-                {favDialogue.length}/200
-              </span>
-            </div>
-
-            <div className="space-y-1">
-              <textarea
-                rows={2}
-                maxLength={200}
-                value={favDialogue}
-                onChange={(e) => setFavDialogue(e.target.value)}
-                placeholder="e.g. గుర్తుంచుకో శంభో, భయం అనేది ఒక్క క్షణం మాత్రమే ఉంటుంది..."
-                className="w-full bg-[#1A1C1C] border border-[#303232] px-3 py-2 text-sm text-[#E6E6E6] focus:outline-none focus:border-[#6C86FF] transition-colors rounded-none"
-              />
-            </div>
-
-            <div className="space-y-1">
-              <label className="block text-xs font-medium text-[#A8A8A8]">
-                Dialogue Source / Film
-              </label>
-              <input
-                type="text"
-                value={favDialogueSource}
-                onChange={(e) => setFavDialogueSource(e.target.value)}
-                placeholder="e.g. Shiva (1989)"
-                className="w-full bg-[#1A1C1C] border border-[#303232] px-3 py-2 text-sm text-[#E6E6E6] focus:outline-none focus:border-[#6C86FF] transition-colors rounded-none"
-              />
-            </div>
-          </section>
-
-          {/* Section: Film DNA (Max 5 filmmakers, Max 5 genres) */}
-          <section className="bg-[#232525] border border-[#303232] p-5 space-y-4 rounded-none">
-            <h2 className="text-xs uppercase tracking-wider font-semibold text-[#878787]">
-              Film DNA
-            </h2>
-
-            {/* Filmmakers */}
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <label className="block text-xs font-medium text-[#A8A8A8]">
-                  Favourite Filmmakers (Max 5)
-                </label>
-                <span className="text-[11px] font-mono text-[#878787]">
-                  {favFilmmakers.length}/5
-                </span>
-              </div>
-              <div className="flex flex-wrap gap-1.5">
-                {favFilmmakers.map((d, idx) => (
-                  <span
-                    key={idx}
-                    className="inline-flex items-center space-x-1 px-2.5 py-1 text-xs bg-[#1A1C1C] border border-[#303232] text-[#E6E6E6] rounded-none"
-                  >
-                    <span>{d}</span>
-                    <button
-                      type="button"
-                      onClick={() =>
-                        setFavFilmmakers(favFilmmakers.filter((_, i) => i !== idx))
-                      }
-                      className="text-[#878787] hover:text-[#E6E6E6]"
-                    >
-                      <X size={12} />
-                    </button>
-                  </span>
-                ))}
-              </div>
-              {favFilmmakers.length < 5 && (
-                <input
-                  type="text"
-                  value={filmmakerInput}
-                  onChange={(e) => setFilmmakerInput(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter" && filmmakerInput.trim()) {
-                      e.preventDefault();
-                      if (!favFilmmakers.includes(filmmakerInput.trim())) {
-                        setFavFilmmakers([...favFilmmakers, filmmakerInput.trim()]);
-                      }
-                      setFilmmakerInput("");
-                    }
-                  }}
-                  placeholder="e.g. Mani Ratnam (press Enter)"
-                  className="w-full bg-[#1A1C1C] border border-[#303232] px-3 py-1.5 text-xs text-[#E6E6E6] focus:outline-none focus:border-[#6C86FF] transition-colors rounded-none"
-                />
-              )}
-            </div>
-
-            {/* Genres */}
-            <div className="space-y-2 pt-2 border-t border-[#303232]">
-              <div className="flex items-center justify-between">
-                <label className="block text-xs font-medium text-[#A8A8A8]">
-                  Favourite Genres (Max 5)
-                </label>
-                <span className="text-[11px] font-mono text-[#878787]">
-                  {favGenres.length}/5
-                </span>
-              </div>
-              <div className="flex flex-wrap gap-1.5">
-                {favGenres.map((g, idx) => (
-                  <span
-                    key={idx}
-                    className="inline-flex items-center space-x-1 px-2.5 py-1 text-xs bg-[#1A1C1C] border border-[#303232] text-[#E6E6E6] rounded-none"
-                  >
-                    <span>{g}</span>
-                    <button
-                      type="button"
-                      onClick={() =>
-                        setFavGenres(favGenres.filter((_, i) => i !== idx))
-                      }
-                      className="text-[#878787] hover:text-[#E6E6E6]"
-                    >
-                      <X size={12} />
-                    </button>
-                  </span>
-                ))}
-              </div>
-              {favGenres.length < 5 && (
-                <input
-                  type="text"
-                  value={genreInput}
-                  onChange={(e) => setGenreInput(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter" && genreInput.trim()) {
-                      e.preventDefault();
-                      if (!favGenres.includes(genreInput.trim())) {
-                        setFavGenres([...favGenres, genreInput.trim()]);
-                      }
-                      setGenreInput("");
-                    }
-                  }}
-                  placeholder="e.g. Neo-Noir, Crime, Drama (press Enter)"
-                  className="w-full bg-[#1A1C1C] border border-[#303232] px-3 py-1.5 text-xs text-[#E6E6E6] focus:outline-none focus:border-[#6C86FF] transition-colors rounded-none"
-                />
-              )}
             </div>
           </section>
 
           {/* Section: Skills */}
-          <section className="bg-[#232525] border border-[#303232] p-5 space-y-3 rounded-none">
+          <section className="bg-[#232525] border border-[#303232] p-6 space-y-3 rounded-2xl shadow-lg">
             <h2 className="text-xs uppercase tracking-wider font-semibold text-[#878787]">
               Skills & Disciplines
             </h2>
@@ -734,13 +573,13 @@ export default function EditProfilePage() {
               {skills.map((s, idx) => (
                 <span
                   key={idx}
-                  className="inline-flex items-center space-x-1 px-2.5 py-1 text-xs bg-[#1A1C1C] border border-[#303232] text-[#E6E6E6] rounded-none"
+                  className="inline-flex items-center space-x-1 px-3 py-1 text-xs bg-[#1A1C1C] border border-[#303232] text-[#E6E6E6] rounded-full"
                 >
                   <span>{s}</span>
                   <button
                     type="button"
                     onClick={() => setSkills(skills.filter((_, i) => i !== idx))}
-                    className="text-[#878787] hover:text-[#E6E6E6]"
+                    className="text-[#878787] hover:text-[#E6E6E6] cursor-pointer"
                   >
                     <X size={12} />
                   </button>
@@ -760,20 +599,20 @@ export default function EditProfilePage() {
                   setSkillInput("");
                 }
               }}
-              placeholder="e.g. Screenwriting, Colour Grading, Sound Design (press Enter)"
-              className="w-full bg-[#1A1C1C] border border-[#303232] px-3 py-1.5 text-xs text-[#E6E6E6] focus:outline-none focus:border-[#6C86FF] transition-colors rounded-none"
+              placeholder="e.g. Screenwriting, Colour Grading, Sound Design, Animation (press Enter)"
+              className="w-full bg-[#1A1C1C] border border-[#303232] px-3.5 py-2 text-xs text-[#E6E6E6] focus:outline-none focus:border-[#6C86FF] transition-colors rounded-xl"
             />
           </section>
 
-          {/* Section: Featured Microfilms (Pick up to 3) */}
-          <section className="bg-[#232525] border border-[#303232] p-5 space-y-4 rounded-none">
+          {/* Section: Featured Works (Pick up to 3) */}
+          <section className="bg-[#232525] border border-[#303232] p-6 space-y-4 rounded-2xl shadow-lg">
             <div className="flex items-center justify-between">
               <div>
                 <h2 className="text-xs uppercase tracking-wider font-semibold text-[#878787]">
-                  Featured Microfilms
+                  Featured Creative Works
                 </h2>
                 <p className="text-[11px] text-[#A8A8A8]">
-                  Pick up to 3 films to showcase prominently on your public profile.
+                  Pick up to 3 works to showcase prominently on your public profile.
                 </p>
               </div>
               <span className="text-xs font-mono text-[#6C86FF]">
@@ -782,14 +621,14 @@ export default function EditProfilePage() {
             </div>
 
             {userFilms.length === 0 ? (
-              <div className="py-6 text-center border border-dashed border-[#303232] space-y-2">
-                <FilmIcon size={20} strokeWidth={1.5} className="mx-auto text-[#878787]" />
-                <p className="text-xs text-[#878787]">You haven&apos;t published any microfilms yet.</p>
+              <div className="py-8 text-center border border-dashed border-[#303232] space-y-2 rounded-xl">
+                <FilmIcon size={22} strokeWidth={1.5} className="mx-auto text-[#878787]" />
+                <p className="text-xs text-[#878787]">You haven&apos;t published any works yet.</p>
                 <Link
                   href="/post"
                   className="inline-block text-xs font-semibold text-[#6C86FF] hover:underline uppercase"
                 >
-                  Publish a microfilm
+                  Publish your work
                 </Link>
               </div>
             ) : (
@@ -801,14 +640,14 @@ export default function EditProfilePage() {
                   return (
                     <div
                       key={film.id}
-                      className={`flex items-center justify-between p-3 border transition-colors ${
+                      className={`flex items-center justify-between p-3.5 border transition-colors rounded-xl ${
                         isSelected
                           ? "bg-[#0B1A4A] border-[#6C86FF]/50"
                           : "bg-[#1A1C1C] border-[#303232]"
                       }`}
                     >
                       <div className="flex items-center space-x-3 min-w-0 pr-2">
-                        <div className="w-12 h-8 bg-[#000000] border border-[#303232] shrink-0 overflow-hidden relative">
+                        <div className="w-12 h-8 bg-[#000000] border border-[#303232] shrink-0 overflow-hidden relative rounded-lg">
                           {/* eslint-disable-next-line @next/next/no-img-element */}
                           <img
                             src={
@@ -831,7 +670,7 @@ export default function EditProfilePage() {
 
                       <div className="flex items-center space-x-2 shrink-0">
                         {isSelected && (
-                          <span className="px-2 py-0.5 bg-[#002EC1] text-[#E6E6E6] text-[10px] font-mono font-bold">
+                          <span className="px-2 py-0.5 bg-[#002EC1] text-[#E6E6E6] text-[10px] font-mono font-bold rounded-md">
                             #{position}
                           </span>
                         )}
@@ -845,14 +684,14 @@ export default function EditProfilePage() {
                             } else {
                               if (featuredFilmIds.length >= 3) {
                                 setErrorMessage(
-                                  "You can only feature up to 3 microfilms."
+                                  "You can only feature up to 3 creative works."
                                 );
                                 return;
                               }
                               setFeaturedFilmIds([...featuredFilmIds, film.id]);
                             }
                           }}
-                          className={`px-3 py-1 text-xs font-semibold border transition-colors ${
+                          className={`px-3 py-1.5 text-xs font-semibold border transition-all duration-200 rounded-lg cursor-pointer ${
                             isSelected
                               ? "bg-[#2E3030] border-[#303232] text-[#E6E6E6] hover:text-red-400"
                               : "bg-[#002EC1] border-transparent text-[#E6E6E6] hover:bg-[#1F4BE0]"
@@ -873,7 +712,7 @@ export default function EditProfilePage() {
             <button
               type="submit"
               disabled={saving}
-              className="w-full py-2.5 px-4 bg-[#002EC1] hover:bg-[#1F4BE0] active:bg-[#0021A0] text-[#E6E6E6] text-sm font-semibold transition-colors rounded-none disabled:opacity-50"
+              className="w-full py-3 px-4 bg-[#002EC1] hover:bg-[#1F4BE0] active:bg-[#0021A0] text-[#E6E6E6] text-sm font-semibold transition-all duration-200 rounded-xl disabled:opacity-50 cursor-pointer shadow-md hover:shadow-lg active:scale-[0.99]"
             >
               {saving ? "Saving changes..." : "Save profile"}
             </button>
@@ -881,14 +720,14 @@ export default function EditProfilePage() {
         </form>
 
         {/* Section: Experience Entries Manager */}
-        <section className="bg-[#232525] border border-[#303232] p-5 space-y-4 rounded-none">
+        <section className="bg-[#232525] border border-[#303232] p-6 space-y-4 rounded-2xl shadow-lg">
           <div className="flex items-center justify-between">
             <div>
               <h2 className="text-xs uppercase tracking-wider font-semibold text-[#878787]">
-                Experience
+                Experience & Credits
               </h2>
               <p className="text-[11px] text-[#A8A8A8]">
-                Add film projects, roles, and creative work.
+                Add creative projects, artistic collaborations, and roles.
               </p>
             </div>
             {!isAddingExp && (
@@ -904,7 +743,7 @@ export default function EditProfilePage() {
                   setExpLink("");
                   setIsAddingExp(true);
                 }}
-                className="inline-flex items-center space-x-1.5 px-3 py-1.5 text-xs font-semibold bg-[#2E3030] hover:bg-[#383a3a] text-[#E6E6E6] border border-[#303232] transition-colors rounded-none"
+                className="inline-flex items-center space-x-1.5 px-3 py-1.5 text-xs font-semibold bg-[#2E3030] hover:bg-[#383a3a] text-[#E6E6E6] border border-[#303232] transition-colors rounded-xl cursor-pointer"
               >
                 <Plus size={14} strokeWidth={1.5} />
                 <span>Add entry</span>
@@ -916,7 +755,7 @@ export default function EditProfilePage() {
           {isAddingExp && (
             <form
               onSubmit={handleSaveExperience}
-              className="bg-[#1A1C1C] border border-[#303232] p-4 space-y-3 rounded-none"
+              className="bg-[#1A1C1C] border border-[#303232] p-5 space-y-3 rounded-xl"
             >
               <div className="flex items-center justify-between border-b border-[#303232] pb-2">
                 <span className="text-xs font-semibold text-[#E6E6E6]">
@@ -925,7 +764,7 @@ export default function EditProfilePage() {
                 <button
                   type="button"
                   onClick={() => setIsAddingExp(false)}
-                  className="text-[#878787] hover:text-[#E6E6E6]"
+                  className="text-[#878787] hover:text-[#E6E6E6] cursor-pointer"
                 >
                   <X size={14} />
                 </button>
@@ -941,8 +780,8 @@ export default function EditProfilePage() {
                     required
                     value={expTitle}
                     onChange={(e) => setExpTitle(e.target.value)}
-                    placeholder="e.g. Director, Assistant Editor"
-                    className="w-full bg-[#232525] border border-[#303232] px-3 py-1.5 text-xs text-[#E6E6E6] focus:outline-none focus:border-[#6C86FF] transition-colors rounded-none"
+                    placeholder="e.g. Director, Concept Artist, Sound Designer"
+                    className="w-full bg-[#232525] border border-[#303232] px-3 py-1.5 text-xs text-[#E6E6E6] focus:outline-none focus:border-[#6C86FF] transition-colors rounded-lg"
                   />
                 </div>
 
@@ -955,8 +794,8 @@ export default function EditProfilePage() {
                     required
                     value={expOrg}
                     onChange={(e) => setExpOrg(e.target.value)}
-                    placeholder="e.g. Independent Short Film 'Anaganaga'"
-                    className="w-full bg-[#232525] border border-[#303232] px-3 py-1.5 text-xs text-[#E6E6E6] focus:outline-none focus:border-[#6C86FF] transition-colors rounded-none"
+                    placeholder="e.g. Independent Work 'Anaganaga'"
+                    className="w-full bg-[#232525] border border-[#303232] px-3 py-1.5 text-xs text-[#E6E6E6] focus:outline-none focus:border-[#6C86FF] transition-colors rounded-lg"
                   />
                 </div>
 
@@ -969,7 +808,7 @@ export default function EditProfilePage() {
                     required
                     value={expStartYear}
                     onChange={(e) => setExpStartYear(Number(e.target.value))}
-                    className="w-full bg-[#232525] border border-[#303232] px-3 py-1.5 text-xs text-[#E6E6E6] focus:outline-none focus:border-[#6C86FF] transition-colors rounded-none"
+                    className="w-full bg-[#232525] border border-[#303232] px-3 py-1.5 text-xs text-[#E6E6E6] focus:outline-none focus:border-[#6C86FF] transition-colors rounded-lg"
                   />
                 </div>
 
@@ -982,7 +821,7 @@ export default function EditProfilePage() {
                     value={expEndYear}
                     onChange={(e) => setExpEndYear(e.target.value)}
                     placeholder="Present"
-                    className="w-full bg-[#232525] border border-[#303232] px-3 py-1.5 text-xs text-[#E6E6E6] focus:outline-none focus:border-[#6C86FF] transition-colors rounded-none"
+                    className="w-full bg-[#232525] border border-[#303232] px-3 py-1.5 text-xs text-[#E6E6E6] focus:outline-none focus:border-[#6C86FF] transition-colors rounded-lg"
                   />
                 </div>
               </div>
@@ -996,7 +835,7 @@ export default function EditProfilePage() {
                   value={expDescription}
                   onChange={(e) => setExpDescription(e.target.value)}
                   placeholder="Key contributions and achievements..."
-                  className="w-full bg-[#232525] border border-[#303232] px-3 py-1.5 text-xs text-[#E6E6E6] focus:outline-none focus:border-[#6C86FF] transition-colors rounded-none"
+                  className="w-full bg-[#232525] border border-[#303232] px-3 py-1.5 text-xs text-[#E6E6E6] focus:outline-none focus:border-[#6C86FF] transition-colors rounded-lg"
                 />
               </div>
 
@@ -1009,7 +848,7 @@ export default function EditProfilePage() {
                   value={expLink}
                   onChange={(e) => setExpLink(e.target.value)}
                   placeholder="https://..."
-                  className="w-full bg-[#232525] border border-[#303232] px-3 py-1.5 text-xs text-[#E6E6E6] focus:outline-none focus:border-[#6C86FF] transition-colors rounded-none"
+                  className="w-full bg-[#232525] border border-[#303232] px-3 py-1.5 text-xs text-[#E6E6E6] focus:outline-none focus:border-[#6C86FF] transition-colors rounded-lg"
                 />
               </div>
 
@@ -1017,13 +856,13 @@ export default function EditProfilePage() {
                 <button
                   type="button"
                   onClick={() => setIsAddingExp(false)}
-                  className="px-3 py-1.5 text-xs text-[#A8A8A8] hover:text-[#E6E6E6] transition-colors"
+                  className="px-3 py-1.5 text-xs text-[#A8A8A8] hover:text-[#E6E6E6] transition-colors cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-1.5 text-xs font-semibold bg-[#002EC1] hover:bg-[#1F4BE0] text-[#E6E6E6] transition-colors rounded-none"
+                  className="px-4 py-1.5 text-xs font-semibold bg-[#002EC1] hover:bg-[#1F4BE0] text-[#E6E6E6] transition-colors rounded-lg cursor-pointer"
                 >
                   {editingExpId ? "Update entry" : "Save entry"}
                 </button>
@@ -1037,7 +876,7 @@ export default function EditProfilePage() {
               {experiences.map((exp, idx) => (
                 <div
                   key={exp.id}
-                  className="flex items-center justify-between p-3 bg-[#1A1C1C] border border-[#303232] rounded-none"
+                  className="flex items-center justify-between p-3.5 bg-[#1A1C1C] border border-[#303232] rounded-xl"
                 >
                   <div className="space-y-0.5 min-w-0 pr-3">
                     <p className="text-xs font-semibold text-[#E6E6E6] truncate">
@@ -1054,7 +893,7 @@ export default function EditProfilePage() {
                       onClick={() => moveExperience(idx, "up")}
                       disabled={idx === 0}
                       title="Move up"
-                      className="p-1 text-[#878787] hover:text-[#E6E6E6] disabled:opacity-30"
+                      className="p-1 text-[#878787] hover:text-[#E6E6E6] disabled:opacity-30 cursor-pointer"
                     >
                       <ChevronUp size={14} />
                     </button>
@@ -1063,21 +902,21 @@ export default function EditProfilePage() {
                       onClick={() => moveExperience(idx, "down")}
                       disabled={idx === experiences.length - 1}
                       title="Move down"
-                      className="p-1 text-[#878787] hover:text-[#E6E6E6] disabled:opacity-30"
+                      className="p-1 text-[#878787] hover:text-[#E6E6E6] disabled:opacity-30 cursor-pointer"
                     >
                       <ChevronDown size={14} />
                     </button>
                     <button
                       type="button"
                       onClick={() => handleEditExperienceClick(exp)}
-                      className="px-2 py-1 text-[11px] text-[#6C86FF] hover:underline"
+                      className="px-2 py-1 text-[11px] text-[#6C86FF] hover:underline cursor-pointer"
                     >
                       Edit
                     </button>
                     <button
                       type="button"
                       onClick={() => handleDeleteExperience(exp.id)}
-                      className="p-1 text-[#ff6c6c] hover:opacity-80"
+                      className="p-1 text-[#ff6c6c] hover:opacity-80 cursor-pointer"
                       title="Delete"
                     >
                       <Trash2 size={13} />

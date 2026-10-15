@@ -4,12 +4,12 @@ import { WaitlistForm } from "@/components/waitlist/WaitlistForm";
 export default function FestivalsPage() {
   return (
     <AppLayout title="Festivals">
-      <div className="bg-[#232525] border border-[#303232] p-6 space-y-4 rounded-none">
-        <h2 className="font-display text-2xl tracking-wide text-[#E6E6E6]">
-          Festivals
+      <div className="bg-[#232525] border border-[#303232] p-7 space-y-4 rounded-2xl shadow-lg">
+        <h2 className="font-serif text-2xl sm:text-3xl font-medium tracking-tight text-[#E6E6E6]">
+          Creative Showcases & Festivals
         </h2>
         <p className="text-sm text-[#A8A8A8] leading-relaxed">
-          Film festival submissions and curated showcases are opening soon. Join the early access list to get notified when applications begin.
+          Festival submissions, curated screenings, and artistic awards are opening soon. Join the early access list to receive prompt notifications when entries open.
         </p>
 
         <div className="pt-2">

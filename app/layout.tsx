@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
-import { Anton, Source_Sans_3 } from "next/font/google";
+import { Newsreader, Source_Sans_3 } from "next/font/google";
 import "./globals.css";
 
-const anton = Anton({
-  weight: "400",
+const newsreader = Newsreader({
+  weight: ["400", "500", "600", "700"],
   subsets: ["latin"],
-  variable: "--font-anton",
+  variable: "--font-newsreader",
   display: "swap",
 });
 
@@ -17,8 +17,9 @@ const sourceSans3 = Source_Sans_3({
 });
 
 export const metadata: Metadata = {
-  title: "Filmmaker Platform",
-  description: "A platform for creatives to publish 1 to 3 minute microfilms.",
+  title: "Arkee | Community for Independent Artists",
+  description:
+    "A Telugu-first platform for creative artists to publish 1 to 3 minute works, build an artistic profile, and connect.",
 };
 
 export default function RootLayout({
@@ -27,8 +28,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${anton.variable} ${sourceSans3.variable}`}>
-      <body className="bg-[#000000] text-[#E6E6E6] antialiased">
+    <html
+      lang="en"
+      className={`${newsreader.variable} ${sourceSans3.variable}`}
+    >
+      <body className="bg-[#000000] text-[#E6E6E6] antialiased selection:bg-[#0B1A4A] selection:text-[#6C86FF]">
         {/* Faint light film grain (4% opacity SVG noise with screen blend) */}
         <div className="film-grain" aria-hidden="true" />
         {children}

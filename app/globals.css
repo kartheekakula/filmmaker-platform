@@ -18,9 +18,8 @@
   --accent-yellow: #EFF710;
 }
 
-/* Force border-radius: 0 everywhere per design system */
+/* Refined styling */
 *, *::before, *::after {
-  border-radius: 0 !important;
   font-style: normal !important;
 }
 
