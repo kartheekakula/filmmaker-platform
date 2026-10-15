@@ -3,7 +3,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Heart, Eye } from "lucide-react";
+import { Heart, Eye, Share2, Check } from "lucide-react";
 import { FilmWithCreator } from "@/lib/types";
 import { formatDuration, toggleFilmLike } from "@/lib/films";
 import { useScrollPreview } from "./ScrollPreviewContext";
@@ -45,6 +45,7 @@ export function FilmCard({ film, currentUserId }: FilmCardProps) {
   const [hasLiked, setHasLiked] = useState<boolean>(!!film.user_has_liked);
   const [likeCount, setLikeCount] = useState<number>(film.like_count || 0);
   const [isLiking, setIsLiking] = useState<boolean>(false);
+  const [copied, setCopied] = useState<boolean>(false);
 
   const isActive = activeFilmId === film.id && previewsEnabled;
   const previewStart = film.preview_start_seconds || 0;
@@ -103,7 +104,7 @@ export function FilmCard({ film, currentUserId }: FilmCardProps) {
     const previousLiked = hasLiked;
     const previousCount = likeCount;
 
-    // Optimistic update
+    // Optimistic UI update with tactile feedback
     setHasLiked(!previousLiked);
     setLikeCount(previousLiked ? Math.max(0, previousCount - 1) : previousCount + 1);
     setIsLiking(true);
@@ -113,11 +114,26 @@ export function FilmCard({ film, currentUserId }: FilmCardProps) {
       await toggleFilmLike(supabase, film.id, currentUserId, previousLiked);
     } catch (err) {
       console.error("Like toggle failed:", err);
-      // Revert on error
       setHasLiked(previousLiked);
       setLikeCount(previousCount);
     } finally {
       setIsLiking(false);
+    }
+  };
+
+  const handleShare = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    try {
+      const filmUrl = `${window.location.origin}/f/${film.id}`;
+      if (navigator.clipboard) {
+        await navigator.clipboard.writeText(filmUrl);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+      }
+    } catch (err) {
+      console.error("Share failed:", err);
     }
   };
 
@@ -128,77 +144,70 @@ export function FilmCard({ film, currentUserId }: FilmCardProps) {
   return (
     <article
       ref={cardRef}
-      className="w-full bg-[#232525] border border-[#303232] rounded-none overflow-hidden transition-colors hover:border-[#3E4242]"
+      className="w-full bg-[#1C1E1E] border border-[#2B2D2D] rounded-2xl overflow-hidden transition-all hover:border-[#383B3B] shadow-sm"
     >
-      {/* 1. Creator Header */}
-      <div className="p-3.5 flex items-center justify-between text-xs border-b border-[#303232]">
-        <div className="flex items-center space-x-2.5 min-w-0">
+      {/* 1. Creator Header Row */}
+      <div className="p-4 flex items-center justify-between border-b border-[#2B2D2D]">
+        <div className="flex items-center space-x-3 min-w-0">
           <Link
             href={`/u/${creator.username}`}
-            className="shrink-0 w-7 h-7 bg-[#002EC1] rounded-none flex items-center justify-center text-[#E6E6E6] font-semibold text-xs overflow-hidden"
+            className="shrink-0 w-9 h-9 bg-[#002EC1] rounded-full ring-2 ring-[#2B2D2D] flex items-center justify-center text-[#E6E6E6] font-semibold text-xs overflow-hidden hover:ring-[#6C86FF]/50 transition-all"
           >
             {creator.avatar_url ? (
-              // Fixed dimensions to avoid layout shift
               <img
                 src={creator.avatar_url}
                 alt={creator.display_name}
-                className="w-full h-full object-cover rounded-none"
+                className="w-full h-full object-cover"
               />
             ) : (
               <span>{(creator.display_name || creator.username || "?").charAt(0).toUpperCase()}</span>
             )}
           </Link>
 
-          <div className="flex items-center space-x-1.5 truncate">
-            <Link
-              href={`/u/${creator.username}`}
-              className="text-[#E6E6E6] font-medium hover:text-[#6C86FF] truncate font-sans"
-            >
-              {creator.display_name || creator.username}
-            </Link>
-            <span className="text-[#878787]">•</span>
-            <Link
-              href={`/c/${channelSlug}`}
-              className="text-[#6C86FF] hover:underline font-mono text-[11px] tracking-tight uppercase truncate"
-            >
-              c/{channelName}
-            </Link>
+          <div className="flex flex-col min-w-0">
+            <div className="flex items-center space-x-1.5 truncate">
+              <Link
+                href={`/u/${creator.username}`}
+                className="text-sm font-medium text-[#E6E6E6] hover:text-[#6C86FF] truncate transition-colors"
+              >
+                {creator.display_name || creator.username}
+              </Link>
+            </div>
+            <div className="flex items-center space-x-2 text-[11px] font-mono text-[#878787]">
+              <span>@{creator.username}</span>
+              <span>•</span>
+              <span>{formatRelativeTime(film.created_at)}</span>
+            </div>
           </div>
         </div>
 
-        <span className="text-[#878787] text-[11px] shrink-0 font-mono">
-          {formatRelativeTime(film.created_at)}
-        </span>
-      </div>
-
-      {/* 2. Film Title */}
-      <div className="px-3.5 pt-3 pb-2.5">
-        <Link href={`/f/${film.id}`}>
-          <h2 className="text-base font-semibold text-[#E6E6E6] hover:text-[#6C86FF] transition-colors leading-snug line-clamp-2">
-            {film.title}
-          </h2>
+        {/* Channel Pill Badge */}
+        <Link
+          href={`/c/${channelSlug}`}
+          className="px-2.5 py-1 rounded-full bg-[#252727] hover:bg-[#2F3131] border border-[#303232] text-[#6C86FF] text-[11px] font-mono uppercase tracking-tight shrink-0 transition-colors"
+        >
+          c/{channelName}
         </Link>
       </div>
 
-      {/* 3. Poster & Scroll Preview Frame (16:9 Aspect Ratio) */}
-      <div className="relative aspect-video w-full bg-[#000000] border-y border-[#303232] overflow-hidden select-none">
+      {/* 2. Media / Video Frame (16:9 Aspect Ratio) */}
+      <div className="relative aspect-video w-full bg-[#000000] overflow-hidden select-none">
         {/* Poster Image */}
         <img
           src={film.thumbnail_url || `https://img.youtube.com/vi/${film.youtube_id}/hqdefault.jpg`}
           alt={film.title}
-          className="w-full h-full object-cover rounded-none"
+          className="w-full h-full object-cover"
           loading="lazy"
         />
 
-        {/* Runtime Badge (bottom-right) */}
-        <div className="absolute bottom-2.5 right-2.5 px-1.5 py-0.5 bg-[#000000]/85 border border-[#303232] text-[11px] font-mono text-[#E6E6E6] rounded-none z-10">
+        {/* Runtime Badge (bottom-right pill) */}
+        <div className="absolute bottom-3 right-3 px-2 py-0.5 bg-[#000000]/80 backdrop-blur border border-[#303232] text-xs font-mono text-[#E6E6E6] rounded-full z-10">
           {formatDuration(film.duration_seconds)}
         </div>
 
-        {/* Scroll Preview Player & Overlay */}
+        {/* Scroll Preview Overlay */}
         {isActive && (
           <div className="absolute inset-0 bg-[#000000] z-20">
-            {/* Muted 10s preview YouTube IFrame with pointer-events: none */}
             <iframe
               src={`https://www.youtube-nocookie.com/embed/${film.youtube_id}?autoplay=1&mute=1&controls=0&start=${previewStart}&end=${previewStart + 10}&modestbranding=1&rel=0&playsinline=1&enablejsapi=1`}
               title={`Preview: ${film.title}`}
@@ -206,12 +215,12 @@ export function FilmCard({ film, currentUserId }: FilmCardProps) {
               allow="autoplay; encrypted-media"
             />
 
-            {/* Top-left [untitled]-style PREVIEW badge */}
-            <div className="absolute top-2.5 left-2.5 px-2 py-0.5 bg-[#0B1A4A] border border-[#6C86FF]/40 text-[#6C86FF] text-[10px] font-mono font-bold tracking-wider uppercase rounded-none z-30 pointer-events-none">
+            {/* PREVIEW Pill */}
+            <div className="absolute top-3 left-3 px-2.5 py-0.5 bg-[#0B1A4A] border border-[#6C86FF]/50 text-[#6C86FF] text-[10px] font-mono font-bold tracking-wider uppercase rounded-full z-30 pointer-events-none shadow-sm">
               Preview
             </div>
 
-            {/* Bottom 3px #6C86FF Progress Bar animating over 10 seconds */}
+            {/* 3px Bottom Progress Line */}
             <div className="absolute bottom-0 left-0 right-0 h-[3px] bg-[#303232] z-30 pointer-events-none">
               <div
                 className="h-full bg-[#6C86FF]"
@@ -224,7 +233,7 @@ export function FilmCard({ film, currentUserId }: FilmCardProps) {
           </div>
         )}
 
-        {/* Transparent link overlay so any tap opens the film page */}
+        {/* Full-frame Link to detail */}
         <Link
           href={`/f/${film.id}`}
           className="absolute inset-0 z-20"
@@ -232,56 +241,88 @@ export function FilmCard({ film, currentUserId }: FilmCardProps) {
         />
       </div>
 
-      {/* 4. Caption */}
-      {film.caption && (
-        <div className="px-3.5 py-2.5 text-sm text-[#A8A8A8] leading-relaxed line-clamp-3 font-sans">
-          {film.caption}
-        </div>
-      )}
-
-      {/* 5. Footer Metadata & Interactions */}
-      <div className="px-3.5 py-2.5 border-t border-[#303232] flex items-center justify-between text-xs text-[#878787]">
-        <div className="flex items-center space-x-2">
-          {film.genre && (
-            <span className="px-2 py-0.5 bg-[#2E3030] text-[#A8A8A8] text-[11px] font-mono rounded-none">
-              {film.genre}
-            </span>
-          )}
-          {film.language && (
-            <span className="text-[11px] font-mono text-[#878787]">
-              {film.language}
-            </span>
-          )}
-        </div>
-
+      {/* 3. Instagram-Style Action Bar (Directly below the video) */}
+      <div className="px-4 pt-3.5 pb-2 flex items-center justify-between">
         <div className="flex items-center space-x-4">
-          {/* View Count */}
-          <div className="flex items-center space-x-1 font-mono text-[11px] text-[#878787]">
-            <Eye className="w-3.5 h-3.5 stroke-[1.5]" />
-            <span>{film.view_count || 0}</span>
-          </div>
-
-          {/* Like Button */}
+          {/* Prominent Heart / Like Button (24px) */}
           <button
             type="button"
             onClick={handleLike}
             disabled={isLiking}
-            className={`flex items-center space-x-1.5 font-mono text-xs transition-colors ${
-              hasLiked
-                ? "text-[#6C86FF] font-semibold"
-                : "text-[#A8A8A8] hover:text-[#E6E6E6]"
-            }`}
-            aria-label={hasLiked ? "Unlike film" : "Like film"}
+            className="group flex items-center space-x-1.5 focus:outline-none"
+            aria-label={hasLiked ? "Unlike work" : "Like work"}
           >
             <Heart
-              className={`w-4 h-4 stroke-[1.5] ${
-                hasLiked ? "fill-[#6C86FF] text-[#6C86FF]" : "text-[#A8A8A8]"
+              className={`w-6 h-6 stroke-[1.75] transition-all duration-200 group-hover:scale-110 active:scale-90 ${
+                hasLiked
+                  ? "fill-[#6C86FF] text-[#6C86FF]"
+                  : "text-[#E6E6E6] group-hover:text-[#6C86FF]"
               }`}
             />
-            <span>{likeCount}</span>
+          </button>
+
+          {/* Share Button (22px) */}
+          <button
+            type="button"
+            onClick={handleShare}
+            className="group flex items-center space-x-1 text-[#E6E6E6] hover:text-[#6C86FF] transition-colors focus:outline-none"
+            aria-label="Share work"
+          >
+            {copied ? (
+              <span className="flex items-center space-x-1 text-xs font-mono text-[#6C86FF] bg-[#0B1A4A] px-2 py-0.5 rounded-full">
+                <Check className="w-3.5 h-3.5" />
+                <span>Copied!</span>
+              </span>
+            ) : (
+              <Share2 className="w-5 h-5 stroke-[1.75] group-hover:scale-110 active:scale-90 transition-transform" />
+            )}
           </button>
         </div>
+
+        {/* View Count */}
+        <div className="flex items-center space-x-1.5 text-xs font-mono text-[#878787]">
+          <Eye className="w-4 h-4 stroke-[1.5]" />
+          <span>{film.view_count || 0} views</span>
+        </div>
       </div>
+
+      {/* 4. Social Proof Like Counter */}
+      <div className="px-4 pb-2">
+        <p className="text-xs font-semibold text-[#E6E6E6] font-mono">
+          {likeCount} {likeCount === 1 ? "like" : "likes"}
+        </p>
+      </div>
+
+      {/* 5. Editorial Title (Medium Serif Style) & Caption */}
+      <div className="px-4 pb-3 space-y-1.5">
+        <Link href={`/f/${film.id}`}>
+          <h2 className="font-serif text-xl sm:text-2xl font-medium text-[#E6E6E6] hover:text-[#6C86FF] transition-colors leading-snug">
+            {film.title}
+          </h2>
+        </Link>
+
+        {film.caption && (
+          <p className="text-sm text-[#A8A8A8] font-sans leading-relaxed line-clamp-3">
+            {film.caption}
+          </p>
+        )}
+      </div>
+
+      {/* 6. Genre & Language Badges */}
+      {(film.genre || film.language) && (
+        <div className="px-4 pb-4 pt-1 flex items-center space-x-2">
+          {film.genre && (
+            <span className="px-2.5 py-0.5 rounded-full bg-[#252727] text-[#A8A8A8] text-xs font-mono">
+              {film.genre}
+            </span>
+          )}
+          {film.language && (
+            <span className="px-2.5 py-0.5 rounded-full bg-[#252727] text-[#878787] text-xs font-mono">
+              {film.language}
+            </span>
+          )}
+        </div>
+      )}
     </article>
   );
 }

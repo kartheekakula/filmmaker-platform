@@ -5,7 +5,7 @@ import Link from "next/link";
 import type { Profile, ProfileExperience, Film } from "@/lib/types";
 import { formatDuration } from "@/lib/films";
 import { FollowButton } from "./FollowButton";
-import { MapPin, Globe, Film as FilmIcon, Sparkles, ExternalLink } from "lucide-react";
+import { MapPin, Globe, Sparkles, ExternalLink } from "lucide-react";
 
 interface ProfileViewProps {
   profile: Profile;
@@ -31,11 +31,11 @@ export function ProfileView({
   };
 
   return (
-    <div className="space-y-4">
-      {/* 1. Header Section */}
-      <section className="bg-[#232525] border border-[#303232] overflow-hidden rounded-none">
-        {/* Banner: Uploaded image or flat #002EC1 block */}
-        <div className="w-full h-36 sm:h-44 bg-[#002EC1] relative overflow-hidden">
+    <div className="space-y-6">
+      {/* 1. Header Portfolio Card */}
+      <section className="bg-[#1C1E1E] border border-[#2B2D2D] overflow-hidden rounded-2xl shadow-sm">
+        {/* Banner: Image or flat deep blue gradient block */}
+        <div className="w-full h-36 sm:h-48 bg-[#002EC1] relative overflow-hidden">
           {profile.banner_url ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img
@@ -44,15 +44,15 @@ export function ProfileView({
               className="w-full h-full object-cover"
             />
           ) : (
-            <div className="w-full h-full bg-[#002EC1]" />
+            <div className="w-full h-full bg-gradient-to-r from-[#002EC1] to-[#0B1A4A]" />
           )}
         </div>
 
         {/* Content overlapping banner */}
-        <div className="px-5 pb-5">
+        <div className="px-5 sm:px-6 pb-6">
           {/* Avatar and Action button row */}
-          <div className="flex items-end justify-between -mt-12 sm:-mt-14 mb-3">
-            <div className="w-24 h-24 sm:w-28 sm:h-28 bg-[#002EC1] border-4 border-[#232525] flex items-center justify-center text-3xl font-bold text-[#E6E6E6] rounded-none select-none overflow-hidden shrink-0">
+          <div className="flex items-end justify-between -mt-12 sm:-mt-14 mb-4">
+            <div className="w-24 h-24 sm:w-28 sm:h-28 bg-[#002EC1] border-4 border-[#1C1E1E] flex items-center justify-center text-3xl font-bold text-[#E6E6E6] rounded-full select-none overflow-hidden shrink-0 shadow-md">
               {profile.avatar_url ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img
@@ -61,7 +61,7 @@ export function ProfileView({
                   className="w-full h-full object-cover"
                 />
               ) : (
-                (profile.display_name?.[0] || profile.username?.[0] || "U").toUpperCase()
+                (profile.display_name?.[0] || profile.username?.[0] || "A").toUpperCase()
               )}
             </div>
 
@@ -78,27 +78,27 @@ export function ProfileView({
 
           {/* Name & Headline */}
           <div className="space-y-1">
-            <h1 className="text-xl sm:text-2xl font-bold text-[#E6E6E6] tracking-tight">
+            <h1 className="font-serif text-2xl sm:text-3xl font-medium text-[#E6E6E6] tracking-tight">
               {profile.display_name || profile.username}
             </h1>
             <p className="text-xs text-[#878787] font-mono">@{profile.username}</p>
             {profile.headline && (
-              <p className="text-sm text-[#E6E6E6] leading-relaxed pt-1">
+              <p className="text-sm text-[#E6E6E6] leading-relaxed pt-1.5 font-sans">
                 {profile.headline}
               </p>
             )}
           </div>
 
           {/* Location and Languages */}
-          <div className="flex flex-wrap items-center gap-y-1 gap-x-4 text-xs text-[#A8A8A8] pt-2.5">
+          <div className="flex flex-wrap items-center gap-y-1 gap-x-4 text-xs text-[#A8A8A8] pt-3">
             {profile.location && (
-              <div className="flex items-center space-x-1">
+              <div className="flex items-center space-x-1.5">
                 <MapPin size={13} strokeWidth={1.5} className="text-[#878787]" />
                 <span>{profile.location}</span>
               </div>
             )}
             {profile.languages && profile.languages.length > 0 && (
-              <div className="flex items-center space-x-1">
+              <div className="flex items-center space-x-1.5">
                 <Globe size={13} strokeWidth={1.5} className="text-[#878787]" />
                 <span>{profile.languages.join(", ")}</span>
               </div>
@@ -106,7 +106,7 @@ export function ProfileView({
           </div>
 
           {/* Follower and Following counts */}
-          <div className="flex items-center space-x-4 text-xs pt-3 border-t border-[#303232] mt-4">
+          <div className="flex items-center space-x-5 text-xs pt-4 border-t border-[#2B2D2D] mt-4 font-mono">
             <div className="text-[#A8A8A8]">
               <span className="font-semibold text-[#E6E6E6]">{followerCount}</span>{" "}
               {followerCount === 1 ? "follower" : "followers"}
@@ -121,90 +121,28 @@ export function ProfileView({
         </div>
       </section>
 
-      {/* 2. Fav Dialogue: Quiet pinned quote with 2px left border in #6C86FF */}
-      {profile.fav_dialogue && (
-        <section className="bg-[#232525] border border-[#303232] p-4 rounded-none">
-          <div className="border-l-2 border-[#6C86FF] pl-3.5 space-y-1">
-            <p className="text-sm text-[#E6E6E6] font-normal leading-relaxed">
-              &ldquo;{profile.fav_dialogue}&rdquo;
-            </p>
-            {profile.fav_dialogue_source && (
-              <p className="text-xs text-[#A8A8A8]">
-                — {profile.fav_dialogue_source}
-              </p>
-            )}
-          </div>
+      {/* 2. About / Bio Section */}
+      {profile.bio && (
+        <section className="bg-[#1C1E1E] border border-[#2B2D2D] p-5 sm:p-6 space-y-3 rounded-2xl shadow-sm">
+          <h2 className="text-xs uppercase tracking-wider font-semibold text-[#878787] font-mono">
+            Artist Statement & Vision
+          </h2>
+          <p className="text-sm text-[#E6E6E6] leading-relaxed whitespace-pre-line font-sans">
+            {profile.bio}
+          </p>
         </section>
       )}
 
-      {/* 3. About Section: Bio + Film DNA */}
-      <section className="bg-[#232525] border border-[#303232] p-5 space-y-4 rounded-none">
-        <h2 className="text-xs uppercase tracking-wider font-semibold text-[#878787]">
-          About
-        </h2>
-
-        {profile.bio ? (
-          <p className="text-sm text-[#E6E6E6] leading-relaxed whitespace-pre-line">
-            {profile.bio}
-          </p>
-        ) : (
-          <p className="text-xs text-[#878787]">No bio provided yet.</p>
-        )}
-
-        {/* Film DNA Chips */}
-        {((profile.fav_filmmakers && profile.fav_filmmakers.length > 0) ||
-          (profile.fav_genres && profile.fav_genres.length > 0)) && (
-          <div className="pt-3 border-t border-[#303232] space-y-3">
-            <div className="flex items-center space-x-1.5 text-xs text-[#6C86FF]">
-              <Sparkles size={14} strokeWidth={1.5} />
-              <span className="font-medium">Film DNA</span>
-            </div>
-
-            {profile.fav_filmmakers && profile.fav_filmmakers.length > 0 && (
-              <div className="space-y-1.5">
-                <p className="text-[11px] text-[#878787]">Favourite Filmmakers</p>
-                <div className="flex flex-wrap gap-1.5">
-                  {profile.fav_filmmakers.map((director, i) => (
-                    <span
-                      key={i}
-                      className="px-2.5 py-1 text-xs bg-[#1A1C1C] border border-[#303232] text-[#E6E6E6] rounded-none"
-                    >
-                      {director}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {profile.fav_genres && profile.fav_genres.length > 0 && (
-              <div className="space-y-1.5">
-                <p className="text-[11px] text-[#878787]">Favourite Genres</p>
-                <div className="flex flex-wrap gap-1.5">
-                  {profile.fav_genres.map((genre, i) => (
-                    <span
-                      key={i}
-                      className="px-2.5 py-1 text-xs bg-[#1A1C1C] border border-[#303232] text-[#E6E6E6] rounded-none"
-                    >
-                      {genre}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-        )}
-      </section>
-
-      {/* 4. Featured Section */}
-      <section className="bg-[#232525] border border-[#303232] p-5 space-y-4 rounded-none">
+      {/* 3. Featured Creative Works */}
+      <section className="bg-[#1C1E1E] border border-[#2B2D2D] p-5 sm:p-6 space-y-4 rounded-2xl shadow-sm">
         <div className="flex items-center justify-between">
-          <h2 className="text-xs uppercase tracking-wider font-semibold text-[#878787]">
-            Featured
+          <h2 className="text-xs uppercase tracking-wider font-semibold text-[#878787] font-mono">
+            Featured Works
           </h2>
           {currentUserId === profile.id && (
             <Link
               href="/settings/profile"
-              className="text-[11px] font-mono text-[#6C86FF] hover:underline"
+              className="text-xs font-mono text-[#6C86FF] hover:underline"
             >
               Edit featured
             </Link>
@@ -212,12 +150,12 @@ export function ProfileView({
         </div>
 
         {featuredFilms && featuredFilms.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
             {featuredFilms.map((film) => (
               <Link
                 key={film.id}
                 href={`/f/${film.id}`}
-                className="group block bg-[#1A1C1C] border border-[#303232] hover:border-[#6C86FF]/50 transition-colors overflow-hidden"
+                className="group block bg-[#242626] border border-[#303232] hover:border-[#6C86FF]/50 transition-all rounded-xl overflow-hidden shadow-sm"
               >
                 <div className="relative aspect-video w-full bg-[#000000] overflow-hidden">
                   <img
@@ -225,12 +163,12 @@ export function ProfileView({
                     alt={film.title}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                   />
-                  <div className="absolute bottom-1.5 right-1.5 px-1 py-0.5 bg-[#000000]/80 text-[10px] font-mono text-[#E6E6E6]">
+                  <div className="absolute bottom-1.5 right-1.5 px-2 py-0.5 bg-[#000000]/80 rounded-full text-[10px] font-mono text-[#E6E6E6]">
                     {formatDuration(film.duration_seconds)}
                   </div>
                 </div>
-                <div className="p-2.5 space-y-1">
-                  <h3 className="text-xs font-semibold text-[#E6E6E6] group-hover:text-[#6C86FF] transition-colors truncate">
+                <div className="p-3 space-y-1">
+                  <h3 className="font-serif text-sm font-medium text-[#E6E6E6] group-hover:text-[#6C86FF] transition-colors truncate">
                     {film.title}
                   </h3>
                   <p className="text-[11px] font-mono text-[#878787] truncate">
@@ -241,26 +179,26 @@ export function ProfileView({
             ))}
           </div>
         ) : (
-          <div className="py-6 text-center border border-dashed border-[#303232] space-y-1">
-            <FilmIcon size={20} strokeWidth={1.5} className="mx-auto text-[#878787] mb-1" />
-            <p className="text-xs text-[#A8A8A8]">No featured microfilms yet.</p>
+          <div className="py-8 text-center border border-dashed border-[#303232] rounded-xl space-y-1.5">
+            <Sparkles size={22} strokeWidth={1.5} className="mx-auto text-[#878787]" />
+            <p className="text-xs text-[#A8A8A8]">No featured works showcased yet.</p>
             {currentUserId === profile.id && (
               <Link
                 href="/settings/profile"
-                className="inline-block text-[11px] font-semibold text-[#6C86FF] hover:underline mt-1"
+                className="inline-block text-xs font-semibold text-[#6C86FF] hover:underline"
               >
-                Feature films on your profile
+                Pick works to showcase
               </Link>
             )}
           </div>
         )}
       </section>
 
-      {/* 5. Activity Section */}
-      <section className="bg-[#232525] border border-[#303232] p-5 space-y-4 rounded-none">
+      {/* 4. Activity Section */}
+      <section className="bg-[#1C1E1E] border border-[#2B2D2D] p-5 sm:p-6 space-y-4 rounded-2xl shadow-sm">
         <div className="flex items-center justify-between">
-          <h2 className="text-xs uppercase tracking-wider font-semibold text-[#878787]">
-            Activity
+          <h2 className="text-xs uppercase tracking-wider font-semibold text-[#878787] font-mono">
+            Recent Activity
           </h2>
           <span className="text-[11px] font-mono text-[#878787]">
             Latest uploads
@@ -268,15 +206,15 @@ export function ProfileView({
         </div>
 
         {activityFilms && activityFilms.length > 0 ? (
-          <div className="space-y-2">
+          <div className="space-y-2.5">
             {activityFilms.map((film) => (
               <Link
                 key={film.id}
                 href={`/f/${film.id}`}
-                className="flex items-center justify-between p-2.5 bg-[#1A1C1C] border border-[#303232] hover:border-[#6C86FF]/50 transition-colors group"
+                className="flex items-center justify-between p-3 bg-[#242626] border border-[#303232] hover:border-[#6C86FF]/50 rounded-xl transition-all group"
               >
-                <div className="flex items-center space-x-3 min-w-0 pr-2">
-                  <div className="w-14 h-9 bg-[#000000] shrink-0 overflow-hidden relative border border-[#303232]">
+                <div className="flex items-center space-x-3.5 min-w-0 pr-2">
+                  <div className="w-16 h-10 bg-[#000000] rounded-lg shrink-0 overflow-hidden relative border border-[#303232]">
                     <img
                       src={film.thumbnail_url || `https://img.youtube.com/vi/${film.youtube_id}/hqdefault.jpg`}
                       alt={film.title}
@@ -284,7 +222,7 @@ export function ProfileView({
                     />
                   </div>
                   <div className="min-w-0">
-                    <h3 className="text-xs font-semibold text-[#E6E6E6] group-hover:text-[#6C86FF] transition-colors truncate">
+                    <h3 className="font-serif text-sm font-medium text-[#E6E6E6] group-hover:text-[#6C86FF] transition-colors truncate">
                       {film.title}
                     </h3>
                     <p className="text-[11px] font-mono text-[#878787] truncate">
@@ -300,22 +238,22 @@ export function ProfileView({
             ))}
           </div>
         ) : (
-          <div className="py-6 text-center border border-dashed border-[#303232]">
-            <p className="text-xs text-[#A8A8A8]">No recent film activity yet.</p>
+          <div className="py-8 text-center border border-dashed border-[#303232] rounded-xl">
+            <p className="text-xs text-[#A8A8A8]">No recent artistic uploads yet.</p>
           </div>
         )}
       </section>
 
-      {/* 6. Experience Section */}
-      <section className="bg-[#232525] border border-[#303232] p-5 space-y-4 rounded-none">
-        <h2 className="text-xs uppercase tracking-wider font-semibold text-[#878787]">
-          Experience
+      {/* 5. Creative Experience Section */}
+      <section className="bg-[#1C1E1E] border border-[#2B2D2D] p-5 sm:p-6 space-y-4 rounded-2xl shadow-sm">
+        <h2 className="text-xs uppercase tracking-wider font-semibold text-[#878787] font-mono">
+          Creative Experience & Craft
         </h2>
 
         {experience.length > 0 ? (
-          <div className="space-y-4 divide-y divide-[#303232]">
+          <div className="space-y-4 divide-y divide-[#2B2D2D]">
             {experience.map((exp) => (
-              <div key={exp.id} className="pt-3 first:pt-0 space-y-1">
+              <div key={exp.id} className="pt-3.5 first:pt-0 space-y-1">
                 <div className="flex items-start justify-between">
                   <div>
                     <h3 className="text-sm font-semibold text-[#E6E6E6]">
@@ -329,7 +267,7 @@ export function ProfileView({
                 </div>
 
                 {exp.description && (
-                  <p className="text-xs text-[#A8A8A8] leading-relaxed pt-1">
+                  <p className="text-xs text-[#A8A8A8] leading-relaxed pt-1 font-sans">
                     {exp.description}
                   </p>
                 )}
@@ -353,18 +291,18 @@ export function ProfileView({
         )}
       </section>
 
-      {/* 7. Skills Section */}
-      <section className="bg-[#232525] border border-[#303232] p-5 space-y-3 rounded-none">
-        <h2 className="text-xs uppercase tracking-wider font-semibold text-[#878787]">
-          Skills
+      {/* 6. Artistic Skills Section */}
+      <section className="bg-[#1C1E1E] border border-[#2B2D2D] p-5 sm:p-6 space-y-3 rounded-2xl shadow-sm">
+        <h2 className="text-xs uppercase tracking-wider font-semibold text-[#878787] font-mono">
+          Artistic Skills & Disciplines
         </h2>
 
         {profile.skills && profile.skills.length > 0 ? (
-          <div className="flex flex-wrap gap-1.5">
+          <div className="flex flex-wrap gap-2">
             {profile.skills.map((skill, i) => (
               <span
                 key={i}
-                className="px-2.5 py-1 text-xs bg-[#1A1C1C] border border-[#303232] text-[#E6E6E6] rounded-none"
+                className="px-3 py-1 text-xs bg-[#242626] border border-[#303232] text-[#E6E6E6] rounded-full"
               >
                 {skill}
               </span>

@@ -65,7 +65,7 @@ export function AppLayout({
             {/* Mobile close button header row */}
             <div className="h-14 px-4 flex items-center justify-between border-b border-[#303232]">
               <span className="font-display text-lg tracking-wider text-[#E6E6E6]">
-                FILMMAKER
+                ARKEE
               </span>
               <button
                 type="button"

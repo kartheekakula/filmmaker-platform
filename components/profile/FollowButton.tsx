@@ -30,7 +30,7 @@ export function FollowButton({
       <button
         type="button"
         onClick={() => router.push("/settings/profile")}
-        className="px-4 py-1.5 text-xs font-semibold bg-[#2E3030] hover:bg-[#383a3a] text-[#E6E6E6] border border-[#303232] transition-colors rounded-none"
+        className="px-4 py-2 text-xs font-semibold bg-[#2B2D2D] hover:bg-[#353838] text-[#E6E6E6] border border-[#303232] transition-colors rounded-xl"
       >
         Edit profile
       </button>
@@ -88,9 +88,9 @@ export function FollowButton({
       type="button"
       onClick={handleToggleFollow}
       disabled={loading}
-      className={`px-4 py-1.5 text-xs font-semibold transition-colors rounded-none disabled:opacity-50 ${
+      className={`px-4 py-2 text-xs font-semibold transition-all rounded-xl disabled:opacity-50 shadow-sm ${
         isFollowing
-          ? "bg-[#2E3030] hover:bg-[#383a3a] text-[#E6E6E6] border border-[#303232]"
+          ? "bg-[#242626] hover:bg-[#2B2D2D] text-[#E6E6E6] border border-[#303232]"
           : "bg-[#002EC1] hover:bg-[#1F4BE0] active:bg-[#0021A0] text-[#E6E6E6]"
       }`}
     >

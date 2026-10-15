@@ -2,37 +2,40 @@ import React from "react";
 
 export function SkeletonCard() {
   return (
-    <article className="w-full bg-[#232525] border border-[#303232] rounded-none overflow-hidden">
-      {/* 16:9 aspect ratio video thumbnail skeleton */}
-      <div className="relative aspect-video w-full bg-[#2E3030] animate-pulse">
-        {/* Duration badge skeleton (bottom-right) */}
-        <div className="absolute bottom-2.5 right-2.5 h-4 w-12 bg-[#232525]/80" />
-      </div>
-
-      {/* Card Body */}
-      <div className="p-4 space-y-3">
-        {/* Creator & Title row */}
-        <div className="flex items-start space-x-3">
-          {/* Creator square avatar skeleton */}
-          <div className="w-8 h-8 shrink-0 bg-[#2E3030] rounded-none animate-pulse" />
-
-          {/* Title & subtitle skeleton lines */}
-          <div className="flex-1 space-y-2">
-            <div className="h-4 w-3/4 bg-[#2E3030] rounded-none animate-pulse" />
-            <div className="h-3 w-1/2 bg-[#2E3030] rounded-none animate-pulse" />
+    <article className="w-full bg-[#1C1E1E] border border-[#2B2D2D] rounded-2xl overflow-hidden shadow-sm">
+      {/* Creator row */}
+      <div className="p-4 flex items-center justify-between border-b border-[#2B2D2D]">
+        <div className="flex items-center space-x-3">
+          <div className="w-9 h-9 shrink-0 bg-[#2B2D2D] rounded-full animate-pulse" />
+          <div className="space-y-1.5">
+            <div className="h-3.5 w-28 bg-[#2B2D2D] rounded-full animate-pulse" />
+            <div className="h-2.5 w-16 bg-[#2B2D2D] rounded-full animate-pulse" />
           </div>
         </div>
+        <div className="h-5 w-16 bg-[#2B2D2D] rounded-full animate-pulse" />
+      </div>
 
-        {/* Hairline Divider */}
-        <div className="border-t border-[#303232] pt-3 flex items-center justify-between text-xs text-[#878787]">
-          {/* Category tag skeleton */}
-          <div className="h-3 w-16 bg-[#2E3030] rounded-none animate-pulse" />
+      {/* 16:9 aspect ratio video skeleton */}
+      <div className="relative aspect-video w-full bg-[#242626] animate-pulse">
+        <div className="absolute bottom-3 right-3 h-5 w-12 rounded-full bg-[#1C1E1E]/80" />
+      </div>
 
-          {/* Stats skeleton (likes, views) */}
-          <div className="flex items-center space-x-3">
-            <div className="h-3 w-10 bg-[#2E3030] rounded-none animate-pulse" />
-            <div className="h-3 w-10 bg-[#2E3030] rounded-none animate-pulse" />
+      {/* Action row skeleton */}
+      <div className="p-4 space-y-3">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-4">
+            <div className="w-6 h-6 rounded-full bg-[#2B2D2D] animate-pulse" />
+            <div className="w-6 h-6 rounded-full bg-[#2B2D2D] animate-pulse" />
           </div>
+          <div className="h-3 w-14 bg-[#2B2D2D] rounded-full animate-pulse" />
+        </div>
+
+        <div className="h-3 w-20 bg-[#2B2D2D] rounded-full animate-pulse" />
+
+        {/* Title skeleton */}
+        <div className="space-y-2 pt-1">
+          <div className="h-5 w-3/4 bg-[#2B2D2D] rounded-lg animate-pulse" />
+          <div className="h-3 w-full bg-[#2B2D2D] rounded-md animate-pulse" />
         </div>
       </div>
     </article>
@@ -41,7 +44,7 @@ export function SkeletonCard() {
 
 export function SkeletonFeed() {
   return (
-    <div className="space-y-4">
+    <div className="space-y-5">
       <SkeletonCard />
       <SkeletonCard />
       <SkeletonCard />

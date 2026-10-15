@@ -8,7 +8,7 @@ import { SkeletonCard } from "./SkeletonCard";
 import { ScrollPreviewProvider } from "./ScrollPreviewContext";
 import { FeedCursor, getFilmsFeed, getPopularFilms, getExploreFilms } from "@/lib/films";
 import { createClient } from "@/lib/supabase/client";
-import { Film as FilmIcon, Plus } from "lucide-react";
+import { Sparkles, Plus } from "lucide-react";
 
 interface FeedListProps {
   initialFilms: FilmWithCreator[];
@@ -28,8 +28,8 @@ export function FeedList({
   feedType = "home",
   categorySlug,
   currentUserId,
-  emptyTitle = "No films found",
-  emptySubtitle = "Be the first creator to publish a microfilm here.",
+  emptyTitle = "No creative works found",
+  emptySubtitle = "Be the first artist to publish a work here.",
 }: FeedListProps) {
   const [films, setFilms] = useState<FilmWithCreator[]>(initialFilms);
   const [cursor, setCursor] = useState<FeedCursor | null>(initialCursor);
@@ -88,7 +88,7 @@ export function FeedList({
               setHasMore(res.hasMore);
             }
           } catch (err) {
-            console.error("Failed to load more films:", err);
+            console.error("Failed to load more works:", err);
           } finally {
             setIsLoadingMore(false);
           }
@@ -103,21 +103,21 @@ export function FeedList({
 
   if (films.length === 0 && !isLoadingMore) {
     return (
-      <div className="w-full bg-[#232525] border border-[#303232] p-8 text-center space-y-4">
-        <div className="w-12 h-12 mx-auto bg-[#2E3030] border border-[#303232] flex items-center justify-center text-[#878787]">
-          <FilmIcon className="w-6 h-6 stroke-[1.5]" />
+      <div className="w-full bg-[#1C1E1E] border border-[#2B2D2D] rounded-2xl p-8 sm:p-12 text-center space-y-4 shadow-sm">
+        <div className="w-12 h-12 mx-auto bg-[#242626] border border-[#303232] rounded-full flex items-center justify-center text-[#878787]">
+          <Sparkles className="w-6 h-6 stroke-[1.5] text-[#6C86FF]" />
         </div>
         <div className="space-y-1">
-          <h3 className="text-base font-semibold text-[#E6E6E6]">{emptyTitle}</h3>
-          <p className="text-xs text-[#878787] max-w-sm mx-auto">{emptySubtitle}</p>
+          <h3 className="font-serif text-lg font-medium text-[#E6E6E6]">{emptyTitle}</h3>
+          <p className="text-xs text-[#878787] max-w-sm mx-auto leading-relaxed">{emptySubtitle}</p>
         </div>
-        <div>
+        <div className="pt-2">
           <Link
             href="/post"
-            className="inline-flex items-center space-x-2 px-4 py-2 bg-[#002EC1] hover:bg-[#1F4BE0] active:bg-[#0021A0] text-[#E6E6E6] text-xs font-semibold uppercase tracking-wider transition-colors"
+            className="inline-flex items-center space-x-2 px-5 py-2.5 bg-[#002EC1] hover:bg-[#1F4BE0] active:bg-[#0021A0] text-[#E6E6E6] text-xs font-semibold rounded-xl uppercase tracking-wider transition-colors shadow-sm"
           >
-            <Plus className="w-3.5 h-3.5 stroke-[1.5]" />
-            <span>Post a microfilm</span>
+            <Plus className="w-3.5 h-3.5 stroke-[2]" />
+            <span>Publish your work</span>
           </Link>
         </div>
       </div>
@@ -126,7 +126,7 @@ export function FeedList({
 
   return (
     <ScrollPreviewProvider>
-      <div className="space-y-4">
+      <div className="space-y-6">
         {films.map((film) => (
           <FilmCard
             key={film.id}
@@ -137,7 +137,7 @@ export function FeedList({
 
         {/* Loading skeleton when loading next page */}
         {isLoadingMore && (
-          <div className="space-y-4 pt-2">
+          <div className="space-y-6 pt-2">
             <SkeletonCard />
           </div>
         )}
@@ -147,8 +147,8 @@ export function FeedList({
 
         {/* End of Feed */}
         {!hasMore && films.length > 0 && (
-          <div className="py-8 text-center text-xs font-mono text-[#878787] border-t border-[#303232]">
-            End of reel
+          <div className="py-10 text-center text-xs font-mono text-[#878787] border-t border-[#303232]">
+            End of showcase
           </div>
         )}
       </div>
