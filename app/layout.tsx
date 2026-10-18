@@ -1,18 +1,25 @@
 import type { Metadata } from "next";
-import { Newsreader, Source_Sans_3 } from "next/font/google";
+import { Pixelify_Sans, Archivo_Black, Zilla_Slab } from "next/font/google";
 import "./globals.css";
 
-const newsreader = Newsreader({
-  weight: ["400", "500", "600", "700"],
+const pixelifySans = Pixelify_Sans({
+  weight: ["400"],
   subsets: ["latin"],
-  variable: "--font-newsreader",
+  variable: "--font-pixelify-sans",
   display: "swap",
 });
 
-const sourceSans3 = Source_Sans_3({
-  weight: ["400", "500", "600", "700"],
+const archivoBlack = Archivo_Black({
+  weight: "400",
   subsets: ["latin"],
-  variable: "--font-source-sans-3",
+  variable: "--font-archivo-black",
+  display: "swap",
+});
+
+const zillaSlab = Zilla_Slab({
+  weight: ["400", "500", "700"],
+  subsets: ["latin"],
+  variable: "--font-zilla-slab",
   display: "swap",
 });
 
@@ -30,7 +37,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${newsreader.variable} ${sourceSans3.variable}`}
+      className={`${pixelifySans.variable} ${archivoBlack.variable} ${zillaSlab.variable}`}
     >
       <body className="bg-[#000000] text-[#E6E6E6] antialiased selection:bg-[#0B1A4A] selection:text-[#6C86FF]">
         {/* Faint light film grain (4% opacity SVG noise with screen blend) */}

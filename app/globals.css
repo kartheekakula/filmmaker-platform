@@ -28,7 +28,7 @@ body {
   background-color: var(--bg-page);
   color: var(--text-primary);
   min-height: 100vh;
-  font-family: var(--font-source-sans-3), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-family: var(--font-zilla-slab), Georgia, Cambria, serif;
   overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;

@@ -176,7 +176,7 @@ export default function PostPage() {
       <div className="space-y-6 max-w-[680px] mx-auto">
         {/* Header Intro */}
         <div className="border-b border-[#303232] pb-4">
-          <h1 className="font-serif text-2xl sm:text-3xl font-medium tracking-tight text-[#E6E6E6]">
+          <h1 className="font-heading text-2xl sm:text-3xl tracking-tight text-[#E6E6E6]">
             Publish Your Work
           </h1>
           <p className="text-xs text-[#878787] mt-1">
@@ -408,7 +408,7 @@ export default function PostPage() {
 
               {/* Content area: Title, Actions & Caption */}
               <div className="p-4 space-y-2.5">
-                <h3 className="font-serif text-lg font-medium text-[#E6E6E6] leading-snug">
+                <h3 className="font-heading text-lg text-[#E6E6E6] leading-snug">
                   {title || "Untitled Artwork"}
                 </h3>
 

@@ -31,9 +31,16 @@ const config: Config = {
         },
       },
       fontFamily: {
-        display: ["var(--font-newsreader)", "serif"],
-        serif: ["var(--font-newsreader)", "serif"],
-        sans: ["var(--font-source-sans-3)", "sans-serif"],
+        logo: ["var(--font-pixelify-sans)", "monospace", "sans-serif"],
+        heading: ["var(--font-archivo-black)", "Impact", "Arial Black", "sans-serif"],
+        display: ["var(--font-archivo-black)", "Impact", "Arial Black", "sans-serif"],
+        serif: ["var(--font-archivo-black)", "Impact", "Arial Black", "sans-serif"],
+        sans: ["var(--font-zilla-slab)", "Georgia", "Cambria", "serif"],
+        body: ["var(--font-zilla-slab)", "Georgia", "Cambria", "serif"],
+        mono: ["var(--font-zilla-slab)", "Georgia", "Cambria", "serif"],
+      },
+      fontWeight: {
+        semibold: "500",
       },
       borderRadius: {
         none: "0px",

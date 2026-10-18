@@ -24,7 +24,7 @@ export function SidebarContent({ onItemClick }: SidebarContentProps) {
         <Link
           href="/"
           onClick={onItemClick}
-          className="font-serif text-2xl tracking-tight text-[#E6E6E6] hover:text-[#6C86FF] transition-colors flex items-center space-x-1.5"
+          className="font-logo text-2xl tracking-tight text-[#E6E6E6] hover:text-[#6C86FF] transition-colors flex items-center space-x-1.5"
         >
           <span>Arkee</span>
           <span className="w-1.5 h-1.5 rounded-full bg-[#6C86FF]" />

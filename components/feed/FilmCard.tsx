@@ -296,7 +296,7 @@ export function FilmCard({ film, currentUserId }: FilmCardProps) {
       {/* 5. Editorial Title (Medium Serif Style) & Caption */}
       <div className="px-4 pb-3 space-y-1.5">
         <Link href={`/f/${film.id}`}>
-          <h2 className="font-serif text-xl sm:text-2xl font-medium text-[#E6E6E6] hover:text-[#6C86FF] transition-colors leading-snug">
+          <h2 className="font-heading text-xl sm:text-2xl text-[#E6E6E6] hover:text-[#6C86FF] transition-colors leading-snug">
             {film.title}
           </h2>
         </Link>

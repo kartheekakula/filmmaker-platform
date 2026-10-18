@@ -64,7 +64,7 @@ export function AppLayout({
           <div className="fixed top-0 left-0 bottom-0 w-[260px] bg-[#232525] border-r border-[#303232] flex flex-col z-50">
             {/* Mobile close button header row */}
             <div className="h-14 px-4 flex items-center justify-between border-b border-[#303232]">
-              <span className="font-display text-lg tracking-wider text-[#E6E6E6]">
+              <span className="font-logo text-lg tracking-wider text-[#E6E6E6]">
                 ARKEE
               </span>
               <button

@@ -139,7 +139,7 @@ export function FilmDetailView({
             </span>
           </div>
 
-          <h1 className="font-serif text-2xl sm:text-3xl font-medium tracking-tight text-[#E6E6E6] leading-snug">
+          <h1 className="font-heading text-2xl sm:text-3xl tracking-tight text-[#E6E6E6] leading-snug">
             {film.title}
           </h1>
         </div>

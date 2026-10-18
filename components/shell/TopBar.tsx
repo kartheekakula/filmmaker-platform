@@ -110,12 +110,12 @@ export function TopBar({
         <div className="flex items-center space-x-2.5">
           <Link
             href="/"
-            className="lg:hidden font-serif text-xl tracking-tight text-[#E6E6E6] hover:text-[#6C86FF] transition-colors"
+            className="lg:hidden font-logo text-xl tracking-tight text-[#E6E6E6] hover:text-[#6C86FF] transition-colors"
           >
             Arkee
           </Link>
           <span className="lg:hidden text-[#878787]">•</span>
-          <h1 className="font-serif text-lg tracking-tight text-[#E6E6E6] truncate font-medium">
+          <h1 className="font-heading text-lg tracking-tight text-[#E6E6E6] truncate">
             {title}
           </h1>
         </div>

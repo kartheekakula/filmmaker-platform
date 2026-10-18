@@ -44,7 +44,7 @@ function LoginForm() {
       <div className="space-y-1.5 text-center">
         <Link
           href="/"
-          className="font-display text-3xl tracking-wider text-[#E6E6E6] hover:text-[#6C86FF] transition-colors inline-block"
+          className="font-logo text-3xl tracking-wider text-[#E6E6E6] hover:text-[#6C86FF] transition-colors inline-block"
         >
           ARKEE
         </Link>

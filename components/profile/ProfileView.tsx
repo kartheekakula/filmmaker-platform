@@ -78,7 +78,7 @@ export function ProfileView({
 
           {/* Name & Headline */}
           <div className="space-y-1">
-            <h1 className="font-serif text-2xl sm:text-3xl font-medium text-[#E6E6E6] tracking-tight">
+            <h1 className="font-heading text-2xl sm:text-3xl text-[#E6E6E6] tracking-tight">
               {profile.display_name || profile.username}
             </h1>
             <p className="text-xs text-[#878787] font-mono">@{profile.username}</p>
@@ -168,7 +168,7 @@ export function ProfileView({
                   </div>
                 </div>
                 <div className="p-3 space-y-1">
-                  <h3 className="font-serif text-sm font-medium text-[#E6E6E6] group-hover:text-[#6C86FF] transition-colors truncate">
+                  <h3 className="font-heading text-sm text-[#E6E6E6] group-hover:text-[#6C86FF] transition-colors truncate">
                     {film.title}
                   </h3>
                   <p className="text-[11px] font-mono text-[#878787] truncate">
@@ -222,7 +222,7 @@ export function ProfileView({
                     />
                   </div>
                   <div className="min-w-0">
-                    <h3 className="font-serif text-sm font-medium text-[#E6E6E6] group-hover:text-[#6C86FF] transition-colors truncate">
+                    <h3 className="font-heading text-sm text-[#E6E6E6] group-hover:text-[#6C86FF] transition-colors truncate">
                       {film.title}
                     </h3>
                     <p className="text-[11px] font-mono text-[#878787] truncate">

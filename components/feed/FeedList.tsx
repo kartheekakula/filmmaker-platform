@@ -108,7 +108,7 @@ export function FeedList({
           <Sparkles className="w-6 h-6 stroke-[1.5] text-[#6C86FF]" />
         </div>
         <div className="space-y-1">
-          <h3 className="font-serif text-lg font-medium text-[#E6E6E6]">{emptyTitle}</h3>
+          <h3 className="font-heading text-lg text-[#E6E6E6]">{emptyTitle}</h3>
           <p className="text-xs text-[#878787] max-w-sm mx-auto leading-relaxed">{emptySubtitle}</p>
         </div>
         <div className="pt-2">
