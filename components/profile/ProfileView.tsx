@@ -51,7 +51,7 @@ export function ProfileView({
         {/* Content overlapping banner */}
         <div className="px-5 sm:px-6 pb-6">
           {/* Avatar and Action button row */}
-          <div className="flex items-end justify-between -mt-12 sm:-mt-14 mb-4">
+          <div className="relative z-10 flex items-end justify-between -mt-12 sm:-mt-14 mb-4">
             <div className="w-24 h-24 sm:w-28 sm:h-28 bg-[#002EC1] border-4 border-[#1C1E1E] flex items-center justify-center text-3xl font-bold text-[#E6E6E6] rounded-full select-none overflow-hidden shrink-0 shadow-md">
               {profile.avatar_url ? (
                 // eslint-disable-next-line @next/next/no-img-element
