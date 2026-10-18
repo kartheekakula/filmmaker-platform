@@ -3,7 +3,7 @@
 import React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Sparkles, Users, Plus, Cpu } from "lucide-react";
+import { Film, Users, Plus, Cpu } from "lucide-react";
 
 export function BottomTabBar() {
   const pathname = usePathname();
@@ -26,8 +26,8 @@ export function BottomTabBar() {
             isFestivalsActive ? "text-[#E6E6E6]" : "text-[#A8A8A8] hover:text-[#E6E6E6]"
           }`}
         >
-          <Sparkles size={22} strokeWidth={1.5} />
-          <span className="text-[10px] mt-1 tracking-tight font-medium">Showcase</span>
+          <Film size={22} strokeWidth={1.5} />
+          <span className="text-[10px] mt-1 tracking-tight font-medium">Film Festivals</span>
         </Link>
 
         {/* Collaborate */}
