@@ -3,9 +3,9 @@
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Heart, Eye, ArrowLeft, Share2, Check } from "lucide-react";
+import { Heart, ArrowLeft, Share2, Check, MessageSquare } from "lucide-react";
 import { FilmWithCreator } from "@/lib/types";
-import { formatDuration, toggleFilmLike, incrementFilmView } from "@/lib/films";
+import { toggleFilmLike, incrementFilmView } from "@/lib/films";
 import { FollowButton } from "@/components/profile/FollowButton";
 import { createClient } from "@/lib/supabase/client";
 
@@ -25,17 +25,15 @@ export function FilmDetailView({
 
   const [hasLiked, setHasLiked] = useState<boolean>(!!film.user_has_liked);
   const [likeCount, setLikeCount] = useState<number>(film.like_count || 0);
-  const [viewCount, setViewCount] = useState<number>(film.view_count || 0);
   const [isLiking, setIsLiking] = useState<boolean>(false);
   const [copied, setCopied] = useState<boolean>(false);
 
-  // Increment view once per session
+  // Increment view once per session (kept in background, not displayed)
   useEffect(() => {
     const sessionKey = `viewed_film_${film.id}`;
     if (!sessionStorage.getItem(sessionKey)) {
       sessionStorage.setItem(sessionKey, "1");
       incrementFilmView(supabase, film.id);
-      setViewCount((prev) => prev + 1);
     }
   }, [film.id, supabase]);
 
@@ -77,18 +75,25 @@ export function FilmDetailView({
     }
   };
 
+  const scrollToComments = () => {
+    const section = document.getElementById("comments-section");
+    if (section) {
+      section.scrollIntoView({ behavior: "smooth" });
+    }
+  };
+
   const creator = film.profiles;
   const channelSlug = film.category_slug;
   const channelName = film.categories?.name || channelSlug;
 
   return (
-    <div className="space-y-6 max-w-[760px] mx-auto pb-12">
-      {/* Top Back Nav */}
+    <div className="space-y-4 max-w-[760px] mx-auto pb-16">
+      {/* Top Back Nav & Channel Link */}
       <div className="flex items-center justify-between">
         <button
           type="button"
           onClick={() => router.back()}
-          className="inline-flex items-center space-x-1.5 text-xs text-[#A8A8A8] hover:text-[#E6E6E6] font-mono transition-colors"
+          className="inline-flex items-center space-x-1.5 text-xs text-[#A8A8A8] hover:text-[#E6E6E6] transition-colors cursor-pointer"
         >
           <ArrowLeft className="w-3.5 h-3.5 stroke-[1.5]" />
           <span>Back</span>
@@ -96,7 +101,7 @@ export function FilmDetailView({
 
         <Link
           href={`/c/${channelSlug}`}
-          className="text-xs font-mono text-[#6C86FF] hover:underline uppercase tracking-wider"
+          className="text-xs text-[#6C86FF] hover:underline uppercase tracking-wider"
         >
           c/{channelName}
         </Link>
@@ -113,132 +118,96 @@ export function FilmDetailView({
         />
       </div>
 
-      {/* Film Information & Actions */}
-      <div className="bg-[#232525] border border-[#303232] p-6 space-y-6 rounded-2xl shadow-xl">
-        {/* Title and Metadata Strip */}
-        <div className="space-y-3">
-          <div className="flex flex-wrap items-center gap-2 text-xs font-mono text-[#878787]">
-            <span className="px-2.5 py-0.5 bg-[#000000]/80 border border-[#303232] text-[#E6E6E6] rounded-full">
-              {formatDuration(film.duration_seconds)}
-            </span>
-            {film.genre && (
-              <span className="px-2.5 py-0.5 bg-[#2E3030] text-[#A8A8A8] rounded-full">
-                {film.genre}
-              </span>
-            )}
-            {film.language && (
-              <span className="text-[#878787]">{film.language}</span>
-            )}
-            <span>•</span>
-            <span className="text-[#878787]">
-              {new Date(film.created_at).toLocaleDateString("en-US", {
-                year: "numeric",
-                month: "short",
-                day: "numeric",
-              })}
-            </span>
-          </div>
+      {/* Action Row: Like, Comment, Share (Icon-only, stroke 1.5, size 20, small counts) */}
+      <div className="flex items-center space-x-6 pt-1">
+        <button
+          type="button"
+          onClick={handleLike}
+          disabled={isLiking}
+          className="flex items-center space-x-1.5 text-[#A8A8A8] hover:text-[#E6E6E6] transition-colors cursor-pointer"
+          aria-label="Like"
+        >
+          <Heart
+            size={20}
+            strokeWidth={1.5}
+            className={hasLiked ? "fill-[#6C86FF] text-[#6C86FF]" : "text-[#A8A8A8]"}
+          />
+          <span className="text-xs">{likeCount}</span>
+        </button>
 
-          <h1 className="font-heading text-2xl sm:text-3xl tracking-tight text-[#E6E6E6] leading-snug">
-            {film.title}
-          </h1>
-        </div>
+        <button
+          type="button"
+          onClick={scrollToComments}
+          className="flex items-center space-x-1.5 text-[#A8A8A8] hover:text-[#E6E6E6] transition-colors cursor-pointer"
+          aria-label="Comment"
+        >
+          <MessageSquare size={20} strokeWidth={1.5} />
+          <span className="text-xs">{(film as unknown as { comment_count?: number }).comment_count || 0}</span>
+        </button>
 
-        {/* Action Buttons: Instagram-style Like, Views, Share */}
-        <div className="pt-2 border-t border-[#303232] flex items-center justify-between">
-          <div className="flex items-center space-x-4">
-            <button
-              type="button"
-              onClick={handleLike}
-              disabled={isLiking}
-              className={`inline-flex items-center space-x-2.5 px-4 py-2 border transition-all duration-200 text-sm font-semibold rounded-xl cursor-pointer ${
-                hasLiked
-                  ? "bg-[#0B1A4A] border-[#6C86FF] text-[#6C86FF] shadow-sm shadow-[#6C86FF]/20"
-                  : "bg-[#2E3030] border-[#303232] text-[#A8A8A8] hover:text-[#E6E6E6] hover:bg-[#353838]"
-              } active:scale-95`}
-            >
-              <Heart
-                className={`w-5 h-5 stroke-[1.8] transition-transform duration-200 ${
-                  hasLiked ? "fill-[#6C86FF] text-[#6C86FF] scale-110" : "text-[#A8A8A8]"
-                }`}
+        <button
+          type="button"
+          onClick={handleShare}
+          className="flex items-center space-x-1.5 text-[#A8A8A8] hover:text-[#E6E6E6] transition-colors cursor-pointer"
+          aria-label="Share"
+        >
+          {copied ? (
+            <>
+              <Check size={20} strokeWidth={1.5} className="text-[#6C86FF]" />
+              <span className="text-xs text-[#6C86FF]">Link copied</span>
+            </>
+          ) : (
+            <Share2 size={20} strokeWidth={1.5} />
+          )}
+        </button>
+      </div>
+
+      {/* Poster Row: Avatar, display name, FollowButton */}
+      <div className="flex items-center justify-between pt-1">
+        <Link
+          href={`/u/${creator.username}`}
+          className="flex items-center space-x-3 group min-w-0"
+        >
+          <div className="w-10 h-10 bg-[#002EC1] rounded-full shrink-0 flex items-center justify-center text-[#E6E6E6] font-bold text-sm overflow-hidden">
+            {creator.avatar_url ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={creator.avatar_url}
+                alt={creator.display_name}
+                className="w-full h-full object-cover"
               />
-              <span className="font-mono text-xs">{likeCount}</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={handleShare}
-              className="inline-flex items-center space-x-2 px-4 py-2 bg-[#2E3030] hover:bg-[#353838] border border-[#303232] text-[#A8A8A8] hover:text-[#E6E6E6] transition-all duration-200 text-xs font-mono rounded-xl cursor-pointer active:scale-95"
-            >
-              {copied ? (
-                <>
-                  <Check className="w-4 h-4 text-[#6C86FF] stroke-[1.8]" />
-                  <span className="text-[#6C86FF] font-semibold">Link copied</span>
-                </>
-              ) : (
-                <>
-                  <Share2 className="w-4 h-4 stroke-[1.8]" />
-                  <span>Share</span>
-                </>
-              )}
-            </button>
+            ) : (
+              <span>{(creator.display_name || creator.username || "?").charAt(0).toUpperCase()}</span>
+            )}
           </div>
 
-          <div className="flex items-center space-x-1.5 text-xs font-mono text-[#878787]">
-            <Eye className="w-4 h-4 stroke-[1.5]" />
-            <span>{viewCount} views</span>
-          </div>
-        </div>
-
-        {/* Creator Block */}
-        <div className="pt-4 border-t border-[#303232] flex items-center justify-between">
-          <Link
-            href={`/u/${creator.username}`}
-            className="flex items-center space-x-3.5 group min-w-0"
-          >
-            <div className="w-11 h-11 bg-[#002EC1] border border-[#303232] rounded-full shrink-0 flex items-center justify-center text-[#E6E6E6] font-bold text-sm overflow-hidden shadow-sm">
-              {creator.avatar_url ? (
-                <img
-                  src={creator.avatar_url}
-                  alt={creator.display_name}
-                  className="w-full h-full object-cover"
-                />
-              ) : (
-                <span>{(creator.display_name || creator.username || "?").charAt(0).toUpperCase()}</span>
-              )}
-            </div>
-
-            <div className="min-w-0 truncate">
-              <p className="text-sm font-semibold text-[#E6E6E6] group-hover:text-[#6C86FF] transition-colors truncate">
-                {creator.display_name || creator.username}
-              </p>
-              <p className="text-xs font-mono text-[#878787] truncate">
-                @{creator.username}
-              </p>
-            </div>
-          </Link>
-
-          <div>
-            <FollowButton
-              targetUserId={creator.id}
-              initialIsFollowing={initialIsFollowing}
-              currentUserId={currentUserId}
-              username={creator.username}
-            />
-          </div>
-        </div>
-
-        {/* Caption & Premise */}
-        {film.caption && (
-          <div className="pt-4 border-t border-[#303232] space-y-2">
-            <h3 className="text-xs font-mono uppercase tracking-wider text-[#878787]">
-              Artist Note / Premise
-            </h3>
-            <p className="text-sm text-[#E6E6E6] leading-relaxed whitespace-pre-wrap font-sans">
-              {film.caption}
+          <div className="min-w-0 truncate">
+            <p className="text-sm font-semibold text-[#E6E6E6] group-hover:text-[#6C86FF] transition-colors truncate">
+              {creator.display_name || creator.username}
             </p>
           </div>
-        )}
+        </Link>
+
+        <div>
+          <FollowButton
+            targetUserId={creator.id}
+            initialIsFollowing={initialIsFollowing}
+            currentUserId={currentUserId}
+            username={creator.username}
+          />
+        </div>
+      </div>
+
+      {/* Caption: Plain text, nothing around it */}
+      {film.caption && (
+        <p className="text-sm text-[#E6E6E6] leading-relaxed whitespace-pre-wrap pt-1">
+          {film.caption}
+        </p>
+      )}
+
+      {/* Comments Anchor & Section */}
+      <div id="comments-section" className="pt-6 border-t border-[#303232]">
+        {/* Placeholder ready for Item E comments list & input */}
       </div>
     </div>
   );
