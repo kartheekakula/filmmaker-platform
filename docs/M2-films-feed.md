@@ -19,7 +19,7 @@ Estimated effort: 14 to 18 hours. M1 must be finished and merged. The scroll pre
 > - Use the YouTube IFrame Player API with muted autoplay and start and end parameters.
 > - The iframe has `pointer-events: none`, with a transparent link overlay on top that opens the film page.
 > - Disable previews when reduced motion or data saver is on, or the connection is slow. Show the poster only.
-> - A 3px progress line in `#6C86FF` along the bottom of the poster shows the 10 seconds, with a small "Preview" tag at the top left.
+> - A 3px progress line in `#6C86FF` along the bottom of the poster shows the 10 seconds.
 >
 > **6. Likes and views.** Like with optimistic UI. Count one view per film per session.
 >

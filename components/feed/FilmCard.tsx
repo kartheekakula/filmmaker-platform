@@ -215,11 +215,6 @@ export function FilmCard({ film, currentUserId }: FilmCardProps) {
               allow="autoplay; encrypted-media"
             />
 
-            {/* PREVIEW Pill */}
-            <div className="absolute top-3 left-3 px-2.5 py-0.5 bg-[#0B1A4A] border border-[#6C86FF]/50 text-[#6C86FF] text-[10px] font-mono font-bold tracking-wider uppercase rounded-full z-30 pointer-events-none shadow-sm">
-              Preview
-            </div>
-
             {/* 3px Bottom Progress Line */}
             <div className="absolute bottom-0 left-0 right-0 h-[3px] bg-[#303232] z-30 pointer-events-none">
               <div
