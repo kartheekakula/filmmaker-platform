@@ -43,6 +43,8 @@ export interface Category {
   sort_order: number;
 }
 
+export type PostType = "video" | "writing" | "image";
+
 export interface Film {
   id: string;
   owner_id: string;
@@ -50,15 +52,19 @@ export interface Film {
   caption: string | null;
   genre: string | null;
   language: string | null;
-  duration_seconds: number;
-  source_type: "youtube";
-  video_url: string;
-  youtube_id: string;
+  duration_seconds: number | null;
+  source_type: "youtube" | null;
+  video_url: string | null;
+  youtube_id: string | null;
   thumbnail_url: string | null;
   preview_start_seconds: number;
   category_slug: string;
   like_count: number;
   view_count: number;
+  comment_count: number;
+  post_type: PostType;
+  body: string | null;
+  media_urls: string[];
   created_at: string;
 }
 
@@ -85,11 +91,28 @@ export interface FilmInput {
   caption?: string | null;
   genre?: string | null;
   language?: string | null;
-  duration_seconds: number;
-  video_url: string;
-  youtube_id: string;
+  duration_seconds?: number | null;
+  video_url?: string | null;
+  youtube_id?: string | null;
   thumbnail_url?: string | null;
   preview_start_seconds?: number;
   category_slug: string;
+  post_type?: PostType;
+  body?: string | null;
+  media_urls?: string[];
+}
+
+export interface Comment {
+  id: string;
+  film_id: string;
+  author_id: string;
+  body: string;
+  created_at: string;
+  profiles: {
+    id: string;
+    username: string;
+    display_name: string;
+    avatar_url: string | null;
+  };
 }
 

@@ -23,6 +23,7 @@ import {
   X,
   ExternalLink,
   Film as FilmIcon,
+  FileText,
 } from "lucide-react";
 
 export default function EditProfilePage() {
@@ -647,23 +648,32 @@ export default function EditProfilePage() {
                       }`}
                     >
                       <div className="flex items-center space-x-3 min-w-0 pr-2">
-                        <div className="w-12 h-8 bg-[#000000] border border-[#303232] shrink-0 overflow-hidden relative rounded-lg">
-                          {/* eslint-disable-next-line @next/next/no-img-element */}
-                          <img
-                            src={
-                              film.thumbnail_url ||
-                              `https://img.youtube.com/vi/${film.youtube_id}/hqdefault.jpg`
-                            }
-                            alt={film.title}
-                            className="w-full h-full object-cover"
-                          />
+                        <div className="w-12 h-8 bg-[#000000] border border-[#303232] shrink-0 overflow-hidden relative rounded-lg flex items-center justify-center">
+                          {film.thumbnail_url || film.youtube_id || (film.media_urls && film.media_urls.length > 0) ? (
+                            // eslint-disable-next-line @next/next/no-img-element
+                            <img
+                              src={
+                                film.thumbnail_url ||
+                                (film.youtube_id
+                                  ? `https://img.youtube.com/vi/${film.youtube_id}/hqdefault.jpg`
+                                  : film.media_urls?.[0] || "")
+                              }
+                              alt={film.title}
+                              className="w-full h-full object-cover"
+                            />
+                          ) : (
+                            <FileText className="w-3.5 h-3.5 text-[#878787]" />
+                          )}
                         </div>
                         <div className="min-w-0">
                           <p className="text-xs font-semibold text-[#E6E6E6] truncate">
                             {film.title}
                           </p>
                           <p className="text-[11px] font-mono text-[#878787] truncate">
-                            {formatDuration(film.duration_seconds)} • c/{film.category_slug}
+                            {film.duration_seconds && film.duration_seconds > 0
+                              ? `${formatDuration(film.duration_seconds)} • `
+                              : ""}
+                            c/{film.category_slug}
                           </p>
                         </div>
                       </div>

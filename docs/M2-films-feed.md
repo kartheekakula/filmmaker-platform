@@ -25,12 +25,10 @@ Estimated effort: 14 to 18 hours. M1 must be finished and merged. The scroll pre
 >
 > **7. Profile integration.** On the edit profile page, let the owner pick up to three of their films as Featured. Show them in the Featured section and show the latest five films in Activity.
 >
-> Do not build AI feedback, comments, votes or the front page. Do not install Lenis, GSAP or React Bits.
->
-> At the end: what was built, what was not, a manual test checklist, and a note on how scrolling performs with 50 films in the feed.
+> Note: Multi-format posts (video, writing, image) and flat comments were added following M2 via migration `20261018000000_posts_and_comments.sql`. Non-video posts allow creators to share storylines, scripts, essays, and design works with comment discussions.
 
 ## Done when
-- A film can be posted only with a channel, and appears in the right channel feed, Popular and Explore as defined.
-- The home feed scrolls smoothly with 50 films and only one preview plays at a time.
+- A creative work (video, writing, image) can be posted only with a channel, and appears in the right channel feed, Popular and Explore as defined.
+- The home feed scrolls smoothly with 50 works and only one preview plays at a time.
 - Previews stop when a card leaves the screen, and are off with reduced motion.
-- Like counts and Featured/Activity on profiles are correct.
+- Like counts, comments, and Featured/Activity on profiles are correct.

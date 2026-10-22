@@ -5,7 +5,7 @@ import Link from "next/link";
 import type { Profile, ProfileExperience, Film } from "@/lib/types";
 import { formatDuration } from "@/lib/films";
 import { FollowButton } from "./FollowButton";
-import { MapPin, Globe, Sparkles, ExternalLink } from "lucide-react";
+import { MapPin, Globe, Sparkles, ExternalLink, FileText } from "lucide-react";
 
 interface ProfileViewProps {
   profile: Profile;
@@ -157,15 +157,30 @@ export function ProfileView({
                 href={`/f/${film.id}`}
                 className="group block bg-[#242626] border border-[#303232] hover:border-[#6C86FF]/50 transition-all rounded-xl overflow-hidden shadow-sm"
               >
-                <div className="relative aspect-video w-full bg-[#000000] overflow-hidden">
-                  <img
-                    src={film.thumbnail_url || `https://img.youtube.com/vi/${film.youtube_id}/hqdefault.jpg`}
-                    alt={film.title}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                  />
-                  <div className="absolute bottom-1.5 right-1.5 px-2 py-0.5 bg-[#000000]/80 rounded-full text-[10px] font-mono text-[#E6E6E6]">
-                    {formatDuration(film.duration_seconds)}
-                  </div>
+                <div className="relative aspect-video w-full bg-[#000000] overflow-hidden flex items-center justify-center">
+                  {film.thumbnail_url || film.youtube_id || (film.media_urls && film.media_urls.length > 0) ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={
+                        film.thumbnail_url ||
+                        (film.youtube_id
+                          ? `https://img.youtube.com/vi/${film.youtube_id}/hqdefault.jpg`
+                          : film.media_urls?.[0] || "")
+                      }
+                      alt={film.title}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex flex-col items-center justify-center bg-[#1A1C1C] p-3 text-center space-y-1">
+                      <FileText className="w-5 h-5 text-[#6C86FF]" />
+                      <span className="text-[11px] font-mono text-[#A8A8A8] truncate max-w-full px-2">{film.title}</span>
+                    </div>
+                  )}
+                  {film.duration_seconds && film.duration_seconds > 0 ? (
+                    <div className="absolute bottom-1.5 right-1.5 px-2 py-0.5 bg-[#000000]/80 rounded-full text-[10px] font-mono text-[#E6E6E6]">
+                      {formatDuration(film.duration_seconds)}
+                    </div>
+                  ) : null}
                 </div>
                 <div className="p-3 space-y-1">
                   <h3 className="font-heading text-sm text-[#E6E6E6] group-hover:text-[#6C86FF] transition-colors truncate">
@@ -214,19 +229,32 @@ export function ProfileView({
                 className="flex items-center justify-between p-3 bg-[#242626] border border-[#303232] hover:border-[#6C86FF]/50 rounded-xl transition-all group"
               >
                 <div className="flex items-center space-x-3.5 min-w-0 pr-2">
-                  <div className="w-16 h-10 bg-[#000000] rounded-lg shrink-0 overflow-hidden relative border border-[#303232]">
-                    <img
-                      src={film.thumbnail_url || `https://img.youtube.com/vi/${film.youtube_id}/hqdefault.jpg`}
-                      alt={film.title}
-                      className="w-full h-full object-cover"
-                    />
+                  <div className="w-16 h-10 bg-[#000000] rounded-lg shrink-0 overflow-hidden relative border border-[#303232] flex items-center justify-center">
+                    {film.thumbnail_url || film.youtube_id || (film.media_urls && film.media_urls.length > 0) ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={
+                          film.thumbnail_url ||
+                          (film.youtube_id
+                            ? `https://img.youtube.com/vi/${film.youtube_id}/hqdefault.jpg`
+                            : film.media_urls?.[0] || "")
+                        }
+                        alt={film.title}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <FileText className="w-4 h-4 text-[#878787]" />
+                    )}
                   </div>
                   <div className="min-w-0">
                     <h3 className="font-heading text-sm text-[#E6E6E6] group-hover:text-[#6C86FF] transition-colors truncate">
                       {film.title}
                     </h3>
                     <p className="text-[11px] font-mono text-[#878787] truncate">
-                      {formatDuration(film.duration_seconds)} • c/{film.category_slug}
+                      {film.duration_seconds && film.duration_seconds > 0
+                        ? `${formatDuration(film.duration_seconds)} • `
+                        : ""}
+                      c/{film.category_slug}
                     </p>
                   </div>
                 </div>

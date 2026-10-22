@@ -1,5 +1,5 @@
 import { SupabaseClient } from "@supabase/supabase-js";
-import { Film, FilmWithCreator, FilmInput, FeaturedFilm } from "@/lib/types";
+import { Film, FilmWithCreator, FilmInput, FeaturedFilm, Comment } from "@/lib/types";
 
 /**
  * Extracts standard 11-char YouTube video ID from various URL formats:
@@ -18,7 +18,10 @@ export function extractYouTubeId(url: string): string | null {
 /**
  * Returns formatted mm:ss from seconds
  */
-export function formatDuration(seconds: number): string {
+export function formatDuration(seconds: number | null | undefined): string {
+  if (seconds === null || seconds === undefined || isNaN(seconds) || seconds <= 0) {
+    return "";
+  }
   const mins = Math.floor(seconds / 60);
   const secs = seconds % 60;
   return `${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
@@ -387,44 +390,83 @@ export async function incrementFilmView(
 }
 
 /**
- * Post a new film (1 to 180 seconds duration)
+ * Post a new film or creative work (video, writing, or image)
  */
 export async function createFilm(
   supabase: SupabaseClient,
   userId: string,
   input: FilmInput
 ): Promise<Film> {
-  if (input.duration_seconds < 1 || input.duration_seconds > 180) {
-    throw new Error("Film duration must be between 1 and 180 seconds (3:00 max).");
+  const postType = input.post_type || "video";
+
+  if (!input.title || !input.title.trim()) {
+    throw new Error("Title is required.");
   }
 
   if (!input.category_slug) {
     throw new Error("A channel category is required.");
   }
 
+  const payload: Record<string, unknown> = {
+    owner_id: userId,
+    title: input.title.trim(),
+    caption: input.caption?.trim() || null,
+    genre: input.genre?.trim() || null,
+    language: input.language?.trim() || null,
+    category_slug: input.category_slug,
+    post_type: postType,
+  };
+
+  if (postType === "video") {
+    if (!input.duration_seconds || input.duration_seconds < 1 || input.duration_seconds > 180) {
+      throw new Error("Video duration must be between 1 and 180 seconds (3:00 max).");
+    }
+    if (!input.video_url || !input.youtube_id) {
+      throw new Error("Valid YouTube URL is required for video posts.");
+    }
+    payload.duration_seconds = input.duration_seconds;
+    payload.source_type = "youtube";
+    payload.video_url = input.video_url.trim();
+    payload.youtube_id = input.youtube_id;
+    payload.thumbnail_url =
+      input.thumbnail_url ||
+      `https://img.youtube.com/vi/${input.youtube_id}/hqdefault.jpg`;
+    payload.preview_start_seconds = input.preview_start_seconds || 0;
+  } else if (postType === "writing") {
+    if (!input.body || !input.body.trim()) {
+      throw new Error("Writing content is required.");
+    }
+    payload.body = input.body.trim();
+    payload.duration_seconds = null;
+    payload.source_type = null;
+    payload.video_url = null;
+    payload.youtube_id = null;
+    payload.thumbnail_url = null;
+    payload.preview_start_seconds = 0;
+  } else if (postType === "image") {
+    if (!input.media_urls || input.media_urls.length === 0) {
+      throw new Error("At least one image is required.");
+    }
+    if (input.media_urls.length > 4) {
+      throw new Error("Maximum of 4 images allowed per post.");
+    }
+    payload.media_urls = input.media_urls;
+    payload.thumbnail_url = input.media_urls[0];
+    payload.duration_seconds = null;
+    payload.source_type = null;
+    payload.video_url = null;
+    payload.youtube_id = null;
+    payload.preview_start_seconds = 0;
+  }
+
   const { data, error } = await supabase
     .from("films")
-    .insert({
-      owner_id: userId,
-      title: input.title.trim(),
-      caption: input.caption?.trim() || null,
-      genre: input.genre?.trim() || null,
-      language: input.language?.trim() || null,
-      duration_seconds: input.duration_seconds,
-      source_type: "youtube",
-      video_url: input.video_url.trim(),
-      youtube_id: input.youtube_id,
-      thumbnail_url:
-        input.thumbnail_url ||
-        `https://img.youtube.com/vi/${input.youtube_id}/hqdefault.jpg`,
-      preview_start_seconds: input.preview_start_seconds || 0,
-      category_slug: input.category_slug,
-    })
+    .insert(payload)
     .select()
     .single();
 
   if (error) {
-    console.error("Error creating film:", error);
+    console.error("Error creating post:", error);
     throw error;
   }
 
@@ -468,24 +510,7 @@ export async function getFeaturedFilms(
       profile_id,
       film_id,
       position,
-      films:film_id (
-        id,
-        owner_id,
-        title,
-        caption,
-        genre,
-        language,
-        duration_seconds,
-        source_type,
-        video_url,
-        youtube_id,
-        thumbnail_url,
-        preview_start_seconds,
-        category_slug,
-        like_count,
-        view_count,
-        created_at
-      )
+      films:film_id (*)
     `
     )
     .eq("profile_id", profileId)
@@ -550,3 +575,122 @@ export async function getCategories(
 
   return data || [];
 }
+
+/**
+ * Fetch comments for a film/post with cursor pagination
+ */
+export async function getFilmComments(
+  supabase: SupabaseClient,
+  filmId: string,
+  options: {
+    limit?: number;
+    cursor?: { created_at: string; id: string } | null;
+  } = {}
+): Promise<{ comments: Comment[]; nextCursor: { created_at: string; id: string } | null; hasMore: boolean }> {
+  const limit = options.limit ?? 20;
+  let query = supabase
+    .from("comments")
+    .select(
+      `
+      *,
+      profiles:author_id (
+        id,
+        username,
+        display_name,
+        avatar_url
+      )
+    `
+    )
+    .eq("film_id", filmId)
+    .order("created_at", { ascending: false })
+    .order("id", { ascending: false })
+    .limit(limit + 1);
+
+  if (options.cursor) {
+    query = query.or(
+      `created_at.lt.${options.cursor.created_at},and(created_at.eq.${options.cursor.created_at},id.lt.${options.cursor.id})`
+    );
+  }
+
+  const { data, error } = await query;
+  if (error) {
+    console.error("Error fetching comments:", error);
+    return { comments: [], nextCursor: null, hasMore: false };
+  }
+
+  const items = (data || []) as Comment[];
+  const hasMore = items.length > limit;
+  const comments = hasMore ? items.slice(0, limit) : items;
+  const nextCursor =
+    hasMore && comments.length > 0
+      ? { created_at: comments[comments.length - 1].created_at, id: comments[comments.length - 1].id }
+      : null;
+
+  return { comments, nextCursor, hasMore };
+}
+
+/**
+ * Add a comment to a film/post
+ */
+export async function addFilmComment(
+  supabase: SupabaseClient,
+  filmId: string,
+  authorId: string,
+  body: string
+): Promise<Comment> {
+  const trimmed = body.trim();
+  if (!trimmed) {
+    throw new Error("Comment cannot be empty.");
+  }
+  if (trimmed.length > 1000) {
+    throw new Error("Comment cannot exceed 1000 characters.");
+  }
+
+  const { data, error } = await supabase
+    .from("comments")
+    .insert({
+      film_id: filmId,
+      author_id: authorId,
+      body: trimmed,
+    })
+    .select(
+      `
+      *,
+      profiles:author_id (
+        id,
+        username,
+        display_name,
+        avatar_url
+      )
+    `
+    )
+    .single();
+
+  if (error) {
+    console.error("Error adding comment:", error);
+    throw error;
+  }
+
+  return data as Comment;
+}
+
+/**
+ * Delete a comment by author
+ */
+export async function deleteFilmComment(
+  supabase: SupabaseClient,
+  commentId: string,
+  authorId: string
+): Promise<void> {
+  const { error } = await supabase
+    .from("comments")
+    .delete()
+    .eq("id", commentId)
+    .eq("author_id", authorId);
+
+  if (error) {
+    console.error("Error deleting comment:", error);
+    throw error;
+  }
+}
+
