@@ -49,7 +49,7 @@ function LoginForm() {
           ARKEE
         </Link>
         <p className="text-xs text-[#A8A8A8] leading-relaxed">
-          Sign in with your Google account to publish artwork, connect with artists, and showcase your creative portfolio.
+          Sign in with Google to post and connect.
         </p>
       </div>
 

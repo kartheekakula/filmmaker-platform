@@ -132,18 +132,18 @@ export function ProfileView({
         </section>
       )}
 
-      {/* 3. Featured Creative Works */}
+      {/* 3. Featured Works */}
       <section className="bg-[#1C1E1E] border border-[#2B2D2D] p-5 sm:p-6 space-y-4 rounded-2xl shadow-sm">
         <div className="flex items-center justify-between">
           <h2 className="text-xs uppercase tracking-wider font-semibold text-[#878787] font-mono">
-            Featured Works
+            Featured
           </h2>
           {currentUserId === profile.id && (
             <Link
               href="/settings/profile"
               className="text-xs font-mono text-[#6C86FF] hover:underline"
             >
-              Edit featured
+              Edit
             </Link>
           )}
         </div>
@@ -190,13 +190,13 @@ export function ProfileView({
         ) : (
           <div className="py-8 text-center border border-dashed border-[#303232] rounded-xl space-y-1.5">
             <Sparkles size={22} strokeWidth={1.5} className="mx-auto text-[#878787]" />
-            <p className="text-xs text-[#A8A8A8]">No featured works showcased yet.</p>
+            <p className="text-xs text-[#A8A8A8]">No featured works yet.</p>
             {currentUserId === profile.id && (
               <Link
                 href="/settings/profile"
                 className="inline-block text-xs font-semibold text-[#6C86FF] hover:underline"
               >
-                Pick works to showcase
+                Add works
               </Link>
             )}
           </div>
@@ -207,10 +207,10 @@ export function ProfileView({
       <section className="bg-[#1C1E1E] border border-[#2B2D2D] p-5 sm:p-6 space-y-4 rounded-2xl shadow-sm">
         <div className="flex items-center justify-between">
           <h2 className="text-xs uppercase tracking-wider font-semibold text-[#878787] font-mono">
-            Recent Activity
+            Activity
           </h2>
           <span className="text-[11px] font-mono text-[#878787]">
-            Latest uploads
+            Uploads
           </span>
         </div>
 
@@ -258,7 +258,7 @@ export function ProfileView({
           </div>
         ) : (
           <div className="py-8 text-center border border-dashed border-[#303232] rounded-xl">
-            <p className="text-xs text-[#A8A8A8]">No recent artistic uploads yet.</p>
+            <p className="text-xs text-[#A8A8A8]">No activity yet.</p>
           </div>
         )}
       </section>
@@ -266,7 +266,7 @@ export function ProfileView({
       {/* 5. Creative Experience Section */}
       <section className="bg-[#1C1E1E] border border-[#2B2D2D] p-5 sm:p-6 space-y-4 rounded-2xl shadow-sm">
         <h2 className="text-xs uppercase tracking-wider font-semibold text-[#878787] font-mono">
-          Creative Experience & Craft
+          Experience
         </h2>
 
         {experience.length > 0 ? (
@@ -298,7 +298,7 @@ export function ProfileView({
                     rel="noopener noreferrer"
                     className="inline-flex items-center space-x-1 text-xs text-[#6C86FF] hover:underline pt-1"
                   >
-                    <span>View project</span>
+                    <span>Project</span>
                     <ExternalLink size={11} strokeWidth={1.5} />
                   </a>
                 )}
@@ -306,14 +306,14 @@ export function ProfileView({
             ))}
           </div>
         ) : (
-          <p className="text-xs text-[#878787]">No creative experience listed yet.</p>
+          <p className="text-xs text-[#878787]">No experience yet.</p>
         )}
       </section>
 
       {/* 6. Artistic Skills Section */}
       <section className="bg-[#1C1E1E] border border-[#2B2D2D] p-5 sm:p-6 space-y-3 rounded-2xl shadow-sm">
         <h2 className="text-xs uppercase tracking-wider font-semibold text-[#878787] font-mono">
-          Artistic Skills & Disciplines
+          Skills
         </h2>
 
         {profile.skills && profile.skills.length > 0 ? (
@@ -328,7 +328,7 @@ export function ProfileView({
             ))}
           </div>
         ) : (
-          <p className="text-xs text-[#878787]">No skills added yet.</p>
+          <p className="text-xs text-[#878787]">No skills yet.</p>
         )}
       </section>
     </div>

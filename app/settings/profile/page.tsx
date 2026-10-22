@@ -387,7 +387,7 @@ export default function EditProfilePage() {
           {/* Section: Images (Banner & Avatar) */}
           <section className="bg-[#232525] border border-[#303232] p-6 space-y-5 rounded-2xl shadow-lg">
             <h2 className="text-xs uppercase tracking-wider font-semibold text-[#878787]">
-              Profile Images
+              Images
             </h2>
 
             {/* Banner Upload */}
@@ -465,7 +465,7 @@ export default function EditProfilePage() {
           {/* Section: Basic Information */}
           <section className="bg-[#232525] border border-[#303232] p-6 space-y-4 rounded-2xl shadow-lg">
             <h2 className="text-xs uppercase tracking-wider font-semibold text-[#878787]">
-              Basic Info
+              Info
             </h2>
 
             <div className="space-y-1">
@@ -567,7 +567,7 @@ export default function EditProfilePage() {
           {/* Section: Skills */}
           <section className="bg-[#232525] border border-[#303232] p-6 space-y-3 rounded-2xl shadow-lg">
             <h2 className="text-xs uppercase tracking-wider font-semibold text-[#878787]">
-              Skills & Disciplines
+              Skills
             </h2>
             <div className="flex flex-wrap gap-1.5">
               {skills.map((s, idx) => (
@@ -609,10 +609,10 @@ export default function EditProfilePage() {
             <div className="flex items-center justify-between">
               <div>
                 <h2 className="text-xs uppercase tracking-wider font-semibold text-[#878787]">
-                  Featured Creative Works
+                  Featured
                 </h2>
                 <p className="text-[11px] text-[#A8A8A8]">
-                  Pick up to 3 works to showcase prominently on your public profile.
+                  Pick up to 3 works.
                 </p>
               </div>
               <span className="text-xs font-mono text-[#6C86FF]">
@@ -623,12 +623,12 @@ export default function EditProfilePage() {
             {userFilms.length === 0 ? (
               <div className="py-8 text-center border border-dashed border-[#303232] space-y-2 rounded-xl">
                 <FilmIcon size={22} strokeWidth={1.5} className="mx-auto text-[#878787]" />
-                <p className="text-xs text-[#878787]">You haven&apos;t published any works yet.</p>
+                <p className="text-xs text-[#878787]">No posts yet.</p>
                 <Link
                   href="/post"
                   className="inline-block text-xs font-semibold text-[#6C86FF] hover:underline uppercase"
                 >
-                  Publish your work
+                  Post
                 </Link>
               </div>
             ) : (
@@ -720,7 +720,7 @@ export default function EditProfilePage() {
               disabled={saving}
               className="w-full py-3 px-4 bg-[#002EC1] hover:bg-[#1F4BE0] active:bg-[#0021A0] text-[#E6E6E6] text-sm font-semibold transition-all duration-200 rounded-xl disabled:opacity-50 cursor-pointer shadow-md hover:shadow-lg active:scale-[0.99]"
             >
-              {saving ? "Saving changes..." : "Save profile"}
+              {saving ? "Saving..." : "Save"}
             </button>
           </div>
         </form>
@@ -730,10 +730,10 @@ export default function EditProfilePage() {
           <div className="flex items-center justify-between">
             <div>
               <h2 className="text-xs uppercase tracking-wider font-semibold text-[#878787]">
-                Experience & Credits
+                Experience
               </h2>
               <p className="text-[11px] text-[#A8A8A8]">
-                Add creative projects, artistic collaborations, and roles.
+                Add your credits.
               </p>
             </div>
             {!isAddingExp && (
@@ -752,7 +752,7 @@ export default function EditProfilePage() {
                 className="inline-flex items-center space-x-1.5 px-3 py-1.5 text-xs font-semibold bg-[#2E3030] hover:bg-[#383a3a] text-[#E6E6E6] border border-[#303232] transition-colors rounded-xl cursor-pointer"
               >
                 <Plus size={14} strokeWidth={1.5} />
-                <span>Add entry</span>
+                <span>Add</span>
               </button>
             )}
           </div>

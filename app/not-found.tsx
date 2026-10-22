@@ -9,14 +9,14 @@ export default function NotFound() {
           404
         </h2>
         <p className="text-sm text-[#A8A8A8]">
-          The page or creative work you requested could not be found.
+          The page you requested could not be found.
         </p>
         <div className="pt-2">
           <Link
             href="/"
             className="inline-block bg-[#002EC1] hover:bg-[#1F4BE0] active:bg-[#0021A0] text-[#E6E6E6] px-6 py-2.5 text-sm font-semibold transition-all duration-200 rounded-xl shadow-md hover:shadow-lg active:scale-[0.99]"
           >
-            Back to Home
+            Home
           </Link>
         </div>
       </div>

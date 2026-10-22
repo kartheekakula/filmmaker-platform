@@ -366,7 +366,7 @@ export function FilmDetailView({
       <section id="comments-section" className="pt-6 border-t border-[#303232] space-y-4">
         <div className="flex items-center justify-between">
           <h2 className="text-sm uppercase tracking-wider font-semibold text-[#878787] font-mono">
-            Feedback & Comments ({commentCount})
+            Comments ({commentCount})
           </h2>
         </div>
 
@@ -379,7 +379,7 @@ export function FilmDetailView({
                 onChange={(e) => setCommentInput(e.target.value)}
                 maxLength={1000}
                 rows={3}
-                placeholder="Share constructive feedback or thoughts on this work..."
+                placeholder="Write a comment..."
                 className="w-full px-3.5 py-2.5 bg-[#1A1C1C] border border-[#303232] text-[#E6E6E6] placeholder-[#878787] text-sm focus:outline-none focus:border-[#6C86FF] rounded-xl resize-none transition-colors"
               />
               <div className="flex items-center justify-between pt-1">
@@ -406,7 +406,7 @@ export function FilmDetailView({
           </form>
         ) : (
           <div className="p-4 bg-[#1A1C1C] border border-[#303232] rounded-xl flex items-center justify-between">
-            <p className="text-xs text-[#A8A8A8]">Sign in to leave feedback and comments.</p>
+            <p className="text-xs text-[#A8A8A8]">Sign in to comment.</p>
             <Link
               href={`/login?next=/f/${film.id}`}
               className="px-3.5 py-1.5 bg-[#002EC1] hover:bg-[#1F4BE0] text-[#E6E6E6] text-xs font-semibold rounded-lg transition-colors"
@@ -434,7 +434,7 @@ export function FilmDetailView({
           </div>
         ) : comments.length === 0 ? (
           <div className="py-8 text-center border border-dashed border-[#303232] rounded-xl">
-            <p className="text-xs text-[#878787]">No comments yet. Share your thoughts.</p>
+            <p className="text-xs text-[#878787]">No comments yet.</p>
           </div>
         ) : (
           <div className="space-y-3 pt-1">

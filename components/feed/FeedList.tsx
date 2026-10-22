@@ -28,8 +28,8 @@ export function FeedList({
   feedType = "home",
   categorySlug,
   currentUserId,
-  emptyTitle = "No creative works found",
-  emptySubtitle = "Be the first artist to publish a work here.",
+  emptyTitle = "No posts found",
+  emptySubtitle = "Be the first to post here.",
 }: FeedListProps) {
   const [films, setFilms] = useState<FilmWithCreator[]>(initialFilms);
   const [cursor, setCursor] = useState<FeedCursor | null>(initialCursor);
@@ -117,7 +117,7 @@ export function FeedList({
             className="inline-flex items-center space-x-2 px-5 py-2.5 bg-[#002EC1] hover:bg-[#1F4BE0] active:bg-[#0021A0] text-[#E6E6E6] text-xs font-semibold rounded-xl uppercase tracking-wider transition-colors shadow-sm"
           >
             <Plus className="w-3.5 h-3.5 stroke-[2]" />
-            <span>Publish your work</span>
+            <span>Post</span>
           </Link>
         </div>
       </div>

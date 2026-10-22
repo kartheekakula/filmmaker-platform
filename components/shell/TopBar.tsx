@@ -175,7 +175,7 @@ export function TopBar({
                     className="flex items-center space-x-2.5 px-3 py-2 text-xs text-[#A8A8A8] hover:text-[#E6E6E6] hover:bg-[#2B2D2D] rounded-xl transition-colors"
                   >
                     <User size={15} strokeWidth={1.5} />
-                    <span>View portfolio</span>
+                    <span>Profile</span>
                   </Link>
 
                   <Link

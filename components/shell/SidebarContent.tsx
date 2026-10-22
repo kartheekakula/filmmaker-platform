@@ -83,7 +83,7 @@ export function SidebarContent({ onItemClick }: SidebarContentProps) {
         {/* Channels Section */}
         <div className="px-5 py-1">
           <span className="text-[11px] uppercase tracking-wider font-semibold text-[#878787] font-mono">
-            Crafts & Channels
+            Channels
           </span>
         </div>
 

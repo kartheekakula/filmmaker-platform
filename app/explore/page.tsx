@@ -34,7 +34,7 @@ export default async function ExplorePage() {
           feedType="explore"
           currentUserId={user?.id}
           emptyTitle="All caught up"
-          emptySubtitle="No new creators to discover right now. Explore channels or check back later."
+          emptySubtitle="No new creators right now."
         />
       </section>
     </AppLayout>

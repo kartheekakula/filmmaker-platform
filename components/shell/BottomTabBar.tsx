@@ -27,7 +27,7 @@ export function BottomTabBar() {
           }`}
         >
           <Film size={22} strokeWidth={1.5} />
-          <span className="text-[10px] mt-1 tracking-tight font-medium">Film Festivals</span>
+          <span className="text-[10px] mt-1 tracking-tight font-medium">Festivals</span>
         </Link>
 
         {/* Collaborate */}

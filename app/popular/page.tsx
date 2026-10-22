@@ -33,8 +33,8 @@ export default async function PopularPage() {
           hasMoreInitial={popularData.hasMore}
           feedType="popular"
           currentUserId={user?.id}
-          emptyTitle="No trending films this week"
-          emptySubtitle="Films with the highest likes in the last 7 days appear here."
+          emptyTitle="No trending posts this week"
+          emptySubtitle="Posts with the most likes appear here."
         />
       </section>
     </AppLayout>

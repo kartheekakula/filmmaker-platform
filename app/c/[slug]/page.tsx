@@ -51,8 +51,8 @@ export default async function ChannelPage({ params }: ChannelPageProps) {
           feedType="channel"
           categorySlug={slug}
           currentUserId={user?.id}
-          emptyTitle={`No microfilms in ${title} yet`}
-          emptySubtitle={`Publish your film under the ${title} channel to reach enthusiasts.`}
+          emptyTitle={`No posts in ${title} yet`}
+          emptySubtitle={`Post under ${title} to share your work.`}
         />
       </section>
     </AppLayout>
