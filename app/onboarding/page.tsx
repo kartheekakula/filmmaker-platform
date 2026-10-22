@@ -5,12 +5,12 @@ import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 
 const SUGGESTED_LANGUAGES = [
-  "Telugu",
   "English",
+  "Telugu",
   "Hindi",
   "Tamil",
-  "Malayalam",
   "Kannada",
+  "Malayalam",
 ];
 
 export default function OnboardingPage() {
@@ -24,7 +24,7 @@ export default function OnboardingPage() {
   const [username, setUsername] = useState("");
   const [headline, setHeadline] = useState("");
   const [location, setLocation] = useState("");
-  const [selectedLanguages, setSelectedLanguages] = useState<string[]>(["Telugu"]);
+  const [selectedLanguages, setSelectedLanguages] = useState<string[]>([]);
   const [customLanguage, setCustomLanguage] = useState("");
 
   const [isCheckingUsername, setIsCheckingUsername] = useState(false);

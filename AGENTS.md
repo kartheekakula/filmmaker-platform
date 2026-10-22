@@ -3,7 +3,7 @@
 Read this file before every task. It is the source of truth. If a request conflicts with it, stop and ask.
 
 ## Product
-A Telugu-first platform for creatives to publish 1 to 3 minute microfilms, written works, and design/artworks, build an artist profile, and get honest AI script feedback. This is a prototype for a pitch and a 20-person college film club test. The product owner (Kartheek) decides every feature and design choice. Never add features, pages, libraries or visual effects that were not requested.
+A platform for creatives to publish microfilms, written works, and design/artworks, build an artist profile, and get honest AI script feedback. This is a prototype for a pitch and a 20-person college film club test. The product owner (Kartheek) decides every feature and design choice. Never add features, pages, libraries or visual effects that were not requested.
 
 ## Stack
 - Next.js (App Router) + TypeScript, Tailwind CSS
@@ -24,7 +24,7 @@ A Telugu-first platform for creatives to publish 1 to 3 minute microfilms, writt
   - Blue used as text, link, icon, line or outline on dark surfaces must be the lighter `#6C86FF`. The base blue has only 1.6 to 2.2 contrast against the dark surfaces and must never be used for text.
   - Yellow `#EFF710` in one place only: the new-activity dot on the avatar.
 - **Shape:** `border-radius: 0` everywhere, including avatars and buttons. No shadows, gradients, glows or blur.
-- **Fonts, two only, loaded with `next/font`:** Anton (stand-in for CS Antibes, swap once licensed) for the logo and large page titles only. Source Sans 3 (stand-in for Nebula Sans) for everything else. Noto Sans Telugu as the fallback for Telugu text. Never use `font-style: italic`.
+- **Fonts, loaded with `next/font`:** Pixelify Sans (logo and brand marks), Archivo Black (display headlines), Zilla Slab (editorial text, titles, body). Never use `font-style: italic`.
 - **Texture:** faint light film grain over the page (about 4 percent opacity, SVG noise with a screen blend, no library).
 - **Icons:** `lucide-react`, outline style, stroke width 1.5, like Substack's thin line icons. 22px in the tab bar, 20px elsewhere. Inactive `#A8A8A8`, active `#E6E6E6`. One icon style only.
 - **Copy:** sentence case, no em dashes, no hype verbs, no "Learn more". Buttons are plain verbs.
@@ -72,7 +72,7 @@ Primary Gemini, fallback Grok (xAI, OpenAI-compatible API). Fall back on a 20 se
 - Small commits after each working feature.
 - Ask before installing any dependency.
 - Mobile first. Every screen has loading, empty and error states.
-- Telugu text must display and save correctly (UTF-8).
+- All text must display and save correctly (UTF-8).
 - Finish with: what was built, what was not built, how to test it manually.
 
 ## Out of scope

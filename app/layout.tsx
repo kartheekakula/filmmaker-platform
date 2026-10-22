@@ -26,7 +26,7 @@ const zillaSlab = Zilla_Slab({
 export const metadata: Metadata = {
   title: "Arkee | Community for Independent Artists",
   description:
-    "A Telugu-first platform for creative artists to publish 1 to 3 minute works, build an artistic profile, and connect.",
+    "A platform for creatives to publish microfilms, written works, and design, build an artist profile, and get honest AI script feedback.",
 };
 
 export default function RootLayout({

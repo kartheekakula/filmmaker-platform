@@ -33,8 +33,8 @@ export default async function HomePage() {
           hasMoreInitial={feedData.hasMore}
           feedType="home"
           currentUserId={user?.id}
-          emptyTitle="No microfilms published yet"
-          emptySubtitle="Be the first creator to share a 1 to 3 minute Telugu microfilm."
+          emptyTitle="No posts yet"
+          emptySubtitle="Nothing here yet."
         />
       </section>
     </AppLayout>

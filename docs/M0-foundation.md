@@ -13,7 +13,7 @@ Estimated effort: 4 to 6 hours. Paste the prompt below into Antigravity. Review 
 >
 > **1. Project setup.** Create a Next.js App Router project with TypeScript and Tailwind. Create the folders `app/`, `components/`, `lib/supabase/`, `lib/ai/`, `supabase/migrations/`. Add `.env.example` with `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, `GEMINI_API_KEY`, `XAI_API_KEY` (placeholders only).
 >
-> **2. Design tokens.** Put the colours, spacing scale and `border-radius: 0` default in Tailwind config and global CSS. Load Anton, Source Sans 3 and Noto Sans Telugu with `next/font` and set the font stacks as described in AGENTS.md. Add the faint light film grain over the page with an SVG noise in CSS. Install `lucide-react` (approved) and use it for every icon, outline style, stroke 1.5.
+> **2. Design tokens.** Put the colours, spacing scale and `border-radius: 0` default in Tailwind config and global CSS. Load Pixelify Sans, Archivo Black and Zilla Slab with `next/font` and set the font stacks as described in AGENTS.md. Add the faint light film grain over the page with an SVG noise in CSS. Install `lucide-react` (approved) and use it for every icon, outline style, stroke 1.5.
 >
 > **3. Supabase.** Browser client, server client (cookie based) and middleware that refreshes the session. No sign-in screens yet.
 >
@@ -35,5 +35,5 @@ Estimated effort: 4 to 6 hours. Paste the prompt below into Antigravity. Review 
 - The app runs locally and on Vercel.
 - Migrations apply cleanly and RLS shows as enabled on every table in Supabase.
 - The drawer opens and closes, the four tabs navigate, and the waitlist form saves a row.
-- Telugu text renders correctly in a test string.
+- Text renders correctly in a test string.
 - No white appears anywhere in the UI. All text meets contrast on the dark surfaces.
