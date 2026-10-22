@@ -232,7 +232,6 @@ export default function PostPage() {
           youtube_id: youtubeId!,
           thumbnail_url: `https://img.youtube.com/vi/${youtubeId}/hqdefault.jpg`,
           duration_seconds: videoDuration || null,
-          preview_start_seconds: 0,
         });
         router.push(`/f/${created.id}`);
       } else if (isImage) {

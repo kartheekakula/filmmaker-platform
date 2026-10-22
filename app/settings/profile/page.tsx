@@ -11,7 +11,6 @@ import {
   getUserFilms,
   getFeaturedFilms,
   updateFeaturedFilms,
-  formatDuration,
 } from "@/lib/films";
 import {
   Upload,
@@ -670,9 +669,6 @@ export default function EditProfilePage() {
                             {film.title}
                           </p>
                           <p className="text-[11px] font-mono text-[#878787] truncate">
-                            {film.duration_seconds && film.duration_seconds > 0
-                              ? `${formatDuration(film.duration_seconds)} • `
-                              : ""}
                             c/{film.category_slug}
                           </p>
                         </div>

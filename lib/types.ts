@@ -89,15 +89,12 @@ export interface FeaturedFilm {
 export interface FilmInput {
   title: string;
   caption?: string | null;
-  genre?: string | null;
-  language?: string | null;
+  category_slug: string;
+  post_type?: PostType;
   duration_seconds?: number | null;
   video_url?: string | null;
   youtube_id?: string | null;
   thumbnail_url?: string | null;
-  preview_start_seconds?: number;
-  category_slug: string;
-  post_type?: PostType;
   body?: string | null;
   media_urls?: string[];
 }

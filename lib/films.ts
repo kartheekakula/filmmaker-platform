@@ -15,32 +15,6 @@ export function extractYouTubeId(url: string): string | null {
   return match ? match[1] : null;
 }
 
-/**
- * Returns formatted mm:ss from seconds
- */
-export function formatDuration(seconds: number | null | undefined): string {
-  if (seconds === null || seconds === undefined || isNaN(seconds) || seconds <= 0) {
-    return "";
-  }
-  const mins = Math.floor(seconds / 60);
-  const secs = seconds % 60;
-  return `${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
-}
-
-/**
- * Parses "mm:ss" or "m:ss" into integer seconds
- */
-export function parseDuration(val: string): number | null {
-  const parts = val.trim().split(":");
-  if (parts.length !== 2) return null;
-  const mins = parseInt(parts[0], 10);
-  const secs = parseInt(parts[1], 10);
-  if (isNaN(mins) || isNaN(secs) || secs < 0 || secs >= 60 || mins < 0) {
-    return null;
-  }
-  return mins * 60 + secs;
-}
-
 export interface FeedCursor {
   created_at: string;
   id: string;
@@ -411,27 +385,27 @@ export async function createFilm(
     owner_id: userId,
     title: input.title.trim(),
     caption: input.caption?.trim() || null,
-    genre: input.genre?.trim() || null,
-    language: input.language?.trim() || null,
+    genre: null,
+    language: null,
     category_slug: input.category_slug,
     post_type: postType,
   };
 
   if (postType === "video") {
-    if (!input.duration_seconds || input.duration_seconds < 1 || input.duration_seconds > 180) {
-      throw new Error("Video duration must be between 1 and 180 seconds (3:00 max).");
+    if (input.duration_seconds && (input.duration_seconds < 1 || input.duration_seconds > 180)) {
+      throw new Error("Video duration must be 3 minutes or less.");
     }
     if (!input.video_url || !input.youtube_id) {
       throw new Error("Valid YouTube URL is required for video posts.");
     }
-    payload.duration_seconds = input.duration_seconds;
+    payload.duration_seconds = input.duration_seconds || null;
     payload.source_type = "youtube";
     payload.video_url = input.video_url.trim();
     payload.youtube_id = input.youtube_id;
     payload.thumbnail_url =
       input.thumbnail_url ||
       `https://img.youtube.com/vi/${input.youtube_id}/hqdefault.jpg`;
-    payload.preview_start_seconds = input.preview_start_seconds || 0;
+    payload.preview_start_seconds = 0;
   } else if (postType === "writing") {
     if (!input.body || !input.body.trim()) {
       throw new Error("Writing content is required.");

@@ -3,7 +3,6 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import type { Profile, ProfileExperience, Film } from "@/lib/types";
-import { formatDuration } from "@/lib/films";
 import { FollowButton } from "./FollowButton";
 import { MapPin, Globe, Sparkles, ExternalLink, FileText } from "lucide-react";
 
@@ -176,11 +175,6 @@ export function ProfileView({
                       <span className="text-[11px] font-mono text-[#A8A8A8] truncate max-w-full px-2">{film.title}</span>
                     </div>
                   )}
-                  {film.duration_seconds && film.duration_seconds > 0 ? (
-                    <div className="absolute bottom-1.5 right-1.5 px-2 py-0.5 bg-[#000000]/80 rounded-full text-[10px] font-mono text-[#E6E6E6]">
-                      {formatDuration(film.duration_seconds)}
-                    </div>
-                  ) : null}
                 </div>
                 <div className="p-3 space-y-1">
                   <h3 className="font-heading text-sm text-[#E6E6E6] group-hover:text-[#6C86FF] transition-colors truncate">
@@ -251,9 +245,6 @@ export function ProfileView({
                       {film.title}
                     </h3>
                     <p className="text-[11px] font-mono text-[#878787] truncate">
-                      {film.duration_seconds && film.duration_seconds > 0
-                        ? `${formatDuration(film.duration_seconds)} • `
-                        : ""}
                       c/{film.category_slug}
                     </p>
                   </div>

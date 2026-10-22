@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Heart, Eye, Share2, Check, MessageSquare } from "lucide-react";
 import { FilmWithCreator } from "@/lib/types";
-import { formatDuration, toggleFilmLike } from "@/lib/films";
+import { toggleFilmLike } from "@/lib/films";
 import { useScrollPreview } from "./ScrollPreviewContext";
 import { createClient } from "@/lib/supabase/client";
 
@@ -49,7 +49,7 @@ export function FilmCard({ film, currentUserId }: FilmCardProps) {
 
   const postType = film.post_type || "video";
   const isActive = postType === "video" && activeFilmId === film.id && previewsEnabled;
-  const previewStart = film.preview_start_seconds || 0;
+  const previewStart = 0;
 
   // Intersection Observer for 60% visibility & 400ms debounce
   useEffect(() => {
@@ -244,13 +244,6 @@ export function FilmCard({ film, currentUserId }: FilmCardProps) {
             loading="lazy"
           />
 
-          {/* Runtime Badge (bottom-right pill) */}
-          {film.duration_seconds && film.duration_seconds > 0 ? (
-            <div className="absolute bottom-3 right-3 px-2 py-0.5 bg-[#000000]/80 backdrop-blur border border-[#303232] text-xs font-mono text-[#E6E6E6] rounded-full z-10">
-              {formatDuration(film.duration_seconds)}
-            </div>
-          ) : null}
-
           {/* Scroll Preview Overlay */}
           {isActive && film.youtube_id && (
             <div className="absolute inset-0 bg-[#000000] z-20">
@@ -352,22 +345,6 @@ export function FilmCard({ film, currentUserId }: FilmCardProps) {
             <p className="text-sm text-[#A8A8A8] font-sans leading-relaxed line-clamp-3">
               {film.caption}
             </p>
-          )}
-        </div>
-      )}
-
-      {/* 5. Genre & Language Badges */}
-      {(film.genre || film.language) && (
-        <div className="px-4 pb-4 pt-1 flex items-center space-x-2">
-          {film.genre && (
-            <span className="px-2.5 py-0.5 rounded-full bg-[#252727] text-[#A8A8A8] text-xs font-mono">
-              {film.genre}
-            </span>
-          )}
-          {film.language && (
-            <span className="px-2.5 py-0.5 rounded-full bg-[#252727] text-[#878787] text-xs font-mono">
-              {film.language}
-            </span>
           )}
         </div>
       )}
