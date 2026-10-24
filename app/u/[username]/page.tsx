@@ -4,7 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { AppLayout } from "@/components/shell/AppLayout";
 import { ProfileView } from "@/components/profile/ProfileView";
 import type { Profile, ProfileExperience, Film } from "@/lib/types";
-import { getFeaturedFilms, getUserFilms } from "@/lib/films";
+import { getFeaturedFilms, getUserPosts } from "@/lib/films";
 
 interface ProfilePageProps {
   params: Promise<{
@@ -60,13 +60,22 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
     .eq("profile_id", profile.id)
     .order("start_year", { ascending: false });
 
-  // 3. Fetch Featured Films & Activity Films
+  // 3. Fetch Featured Films, Posts, and Total Post Count
   const featuredRecords = await getFeaturedFilms(supabase, profile.id);
   const featuredFilms = featuredRecords
     .map((r) => r.films)
     .filter(Boolean) as Film[];
 
-  const activityFilms = await getUserFilms(supabase, profile.id, 5);
+  const { count: postCount } = await supabase
+    .from("films")
+    .select("*", { count: "exact", head: true })
+    .eq("owner_id", profile.id);
+
+  const {
+    films: initialPosts,
+    nextCursor: initialNextCursor,
+    hasMore: initialHasMore,
+  } = await getUserPosts(supabase, profile.id, { limit: 12 });
 
   // 4. Current Authenticated User & Follow Status
   const {
@@ -98,7 +107,10 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
         initialIsFollowing={initialIsFollowing}
         currentUserId={currentUser?.id ?? null}
         featuredFilms={featuredFilms}
-        activityFilms={activityFilms}
+        initialPosts={initialPosts}
+        initialNextCursor={initialNextCursor}
+        initialHasMore={initialHasMore}
+        postCount={postCount ?? 0}
       />
     </AppLayout>
   );

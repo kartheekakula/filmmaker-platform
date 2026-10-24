@@ -1,5 +1,5 @@
 import { SupabaseClient } from "@supabase/supabase-js";
-import { Film, FilmWithCreator, FilmInput, FeaturedFilm, Comment } from "@/lib/types";
+import { Film, FilmWithCreator, FilmInput, FeaturedFilm, Comment, ProfileTileFilm } from "@/lib/types";
 
 /**
  * Extracts standard 11-char YouTube video ID from various URL formats:
@@ -468,6 +468,52 @@ export async function getUserFilms(
   }
 
   return (data || []) as Film[];
+}
+
+/**
+ * Fetch a user's posts for square-tile grid with cursor pagination
+ * Selects only tile columns: id, title, post_type, thumbnail_url, youtube_id, media_urls, created_at
+ */
+export async function getUserPosts(
+  supabase: SupabaseClient,
+  userId: string,
+  options: {
+    limit?: number;
+    cursor?: FeedCursor | null;
+  } = {}
+): Promise<{ films: ProfileTileFilm[]; nextCursor: FeedCursor | null; hasMore: boolean }> {
+  const limit = options.limit ?? 12;
+
+  let query = supabase
+    .from("films")
+    .select("id, title, post_type, thumbnail_url, youtube_id, media_urls, created_at")
+    .eq("owner_id", userId)
+    .order("created_at", { ascending: false })
+    .order("id", { ascending: false })
+    .limit(limit + 1);
+
+  if (options.cursor) {
+    query = query.or(
+      `created_at.lt.${options.cursor.created_at},and(created_at.eq.${options.cursor.created_at},id.lt.${options.cursor.id})`
+    );
+  }
+
+  const { data, error } = await query;
+  if (error) {
+    console.error("Error fetching user posts:", error);
+    return { films: [], nextCursor: null, hasMore: false };
+  }
+
+  const rawFilms = (data || []) as unknown as ProfileTileFilm[];
+  const hasMore = rawFilms.length > limit;
+  const films = hasMore ? rawFilms.slice(0, limit) : rawFilms;
+  const lastItem = films[films.length - 1];
+  const nextCursor =
+    hasMore && lastItem
+      ? { created_at: lastItem.created_at, id: lastItem.id }
+      : null;
+
+  return { films, nextCursor, hasMore };
 }
 
 /**

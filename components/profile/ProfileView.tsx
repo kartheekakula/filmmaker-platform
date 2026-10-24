@@ -1,10 +1,12 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
-import type { Profile, ProfileExperience, Film } from "@/lib/types";
+import type { Profile, ProfileExperience, Film, ProfileTileFilm } from "@/lib/types";
 import { FollowButton } from "./FollowButton";
-import { MapPin, Globe, Sparkles, ExternalLink, FileText } from "lucide-react";
+import { MapPin, Globe, ExternalLink, Pin, Play, Layers, FileText } from "lucide-react";
+import { createClient } from "@/lib/supabase/client";
+import { FeedCursor, getUserPosts } from "@/lib/films";
 
 interface ProfileViewProps {
   profile: Profile;
@@ -12,7 +14,10 @@ interface ProfileViewProps {
   initialIsFollowing: boolean;
   currentUserId: string | null;
   featuredFilms?: Film[];
-  activityFilms?: Film[];
+  initialPosts?: ProfileTileFilm[];
+  initialNextCursor?: FeedCursor | null;
+  initialHasMore?: boolean;
+  postCount?: number;
 }
 
 export function ProfileView({
@@ -21,19 +26,130 @@ export function ProfileView({
   initialIsFollowing,
   currentUserId,
   featuredFilms = [],
-  activityFilms = [],
+  initialPosts = [],
+  initialNextCursor = null,
+  initialHasMore = false,
+  postCount = 0,
 }: ProfileViewProps) {
+  const [supabase] = useState(() => createClient());
   const [followerCount, setFollowerCount] = useState(profile.follower_count ?? 0);
+  const [activeTab, setActiveTab] = useState<"posts" | "about">("posts");
+
+  // Posts state
+  const [posts, setPosts] = useState<ProfileTileFilm[]>(initialPosts);
+  const [cursor, setCursor] = useState<FeedCursor | null>(initialNextCursor);
+  const [hasMore, setHasMore] = useState<boolean>(initialHasMore);
+  const [isLoadingMore, setIsLoadingMore] = useState<boolean>(false);
+  const loadMoreRef = useRef<HTMLDivElement | null>(null);
 
   const handleFollowChange = (isFollowing: boolean) => {
     setFollowerCount((prev) => (isFollowing ? prev + 1 : Math.max(0, prev - 1)));
   };
 
+  // Sync state if initial props change
+  useEffect(() => {
+    setPosts(initialPosts);
+    setCursor(initialNextCursor);
+    setHasMore(initialHasMore);
+  }, [initialPosts, initialNextCursor, initialHasMore]);
+
+  // Infinite scroll observer
+  useEffect(() => {
+    if (!hasMore || isLoadingMore || activeTab !== "posts") return;
+    const triggerEl = loadMoreRef.current;
+    if (!triggerEl) return;
+
+    const observer = new IntersectionObserver(
+      async (entries) => {
+        if (entries[0].isIntersecting && hasMore && !isLoadingMore) {
+          setIsLoadingMore(true);
+          try {
+            const res = await getUserPosts(supabase, profile.id, {
+              limit: 12,
+              cursor,
+            });
+            setPosts((prev) => [...prev, ...res.films]);
+            setCursor(res.nextCursor);
+            setHasMore(res.hasMore);
+          } catch (err) {
+            console.error("Failed to load more posts:", err);
+          } finally {
+            setIsLoadingMore(false);
+          }
+        }
+      },
+      { rootMargin: "300px" }
+    );
+
+    observer.observe(triggerEl);
+    return () => observer.disconnect();
+  }, [hasMore, isLoadingMore, activeTab, cursor, profile.id, supabase]);
+
+  // Filter out featured posts from regular posts to avoid duplicates
+  const featuredIds = new Set(featuredFilms.map((f) => f.id));
+  const unpinnedPosts = posts.filter((p) => !featuredIds.has(p.id));
+  const totalPostsCount = featuredFilms.length + unpinnedPosts.length;
+
+  const renderTile = (film: Film | ProfileTileFilm, isPinned: boolean) => {
+    const postType = film.post_type || "video";
+
+    return (
+      <Link
+        key={film.id}
+        href={`/f/${film.id}`}
+        className="relative aspect-square bg-[#232525] overflow-hidden group select-none block"
+      >
+        {/* Top-Right Badges */}
+        <div className="absolute top-1 right-1 sm:top-1.5 sm:right-1.5 z-10 flex items-center space-x-1 p-0.5 sm:p-1 bg-black/60 text-[#E6E6E6]">
+          {isPinned && <Pin size={13} strokeWidth={1.5} className="text-[#E6E6E6]" />}
+          {postType === "video" && (
+            <Play size={13} strokeWidth={1.5} className="text-[#E6E6E6] fill-[#E6E6E6]/20" />
+          )}
+          {postType === "image" && film.media_urls && film.media_urls.length > 1 && (
+            <Layers size={13} strokeWidth={1.5} className="text-[#E6E6E6]" />
+          )}
+          {postType === "writing" && (
+            <FileText size={13} strokeWidth={1.5} className="text-[#E6E6E6]" />
+          )}
+        </div>
+
+        {/* Tile Content */}
+        {postType === "video" ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={
+              film.thumbnail_url ||
+              (film.youtube_id
+                ? `https://img.youtube.com/vi/${film.youtube_id}/hqdefault.jpg`
+                : "")
+            }
+            alt={film.title}
+            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
+          />
+        ) : postType === "image" ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={film.media_urls?.[0] || film.thumbnail_url || ""}
+            alt={film.title}
+            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
+          />
+        ) : (
+          <div className="w-full h-full bg-[#1C1E1E] p-2 sm:p-3 flex flex-col justify-between group-hover:bg-[#242626] transition-colors">
+            <span className="font-heading text-xs sm:text-sm text-[#E6E6E6] line-clamp-4 leading-tight">
+              {film.title}
+            </span>
+            <div />
+          </div>
+        )}
+      </Link>
+    );
+  };
+
   return (
-    <div className="space-y-6">
-      {/* 1. Header Portfolio Card */}
+    <div className="space-y-4">
+      {/* 1. Header (banner & avatar kept exactly as they work now) */}
       <section className="bg-[#1C1E1E] border border-[#2B2D2D] overflow-hidden rounded-2xl shadow-sm">
-        {/* Banner: Image or flat deep blue gradient block */}
+        {/* Banner */}
         <div className="w-full h-36 sm:h-48 bg-[#002EC1] relative overflow-hidden">
           {profile.banner_url ? (
             // eslint-disable-next-line @next/next/no-img-element
@@ -88,249 +204,179 @@ export function ProfileView({
             )}
           </div>
 
-          {/* Location and Languages */}
-          <div className="flex flex-wrap items-center gap-y-1 gap-x-4 text-xs text-[#A8A8A8] pt-3">
-            {profile.location && (
-              <div className="flex items-center space-x-1.5">
-                <MapPin size={13} strokeWidth={1.5} className="text-[#878787]" />
-                <span>{profile.location}</span>
-              </div>
-            )}
-            {profile.languages && profile.languages.length > 0 && (
-              <div className="flex items-center space-x-1.5">
-                <Globe size={13} strokeWidth={1.5} className="text-[#878787]" />
-                <span>{profile.languages.join(", ")}</span>
-              </div>
-            )}
-          </div>
+          {/* Plain Text Bio */}
+          {profile.bio && (
+            <p className="text-sm text-[#E6E6E6] leading-relaxed whitespace-pre-line pt-2 font-sans">
+              {profile.bio}
+            </p>
+          )}
 
-          {/* Follower and Following counts */}
-          <div className="flex items-center space-x-5 text-xs pt-4 border-t border-[#2B2D2D] mt-4 font-mono">
-            <div className="text-[#A8A8A8]">
-              <span className="font-semibold text-[#E6E6E6]">{followerCount}</span>{" "}
-              {followerCount === 1 ? "follower" : "followers"}
+          {/* Location and Languages */}
+          {(profile.location || (profile.languages && profile.languages.length > 0)) && (
+            <div className="flex flex-wrap items-center gap-y-1 gap-x-4 text-xs text-[#A8A8A8] pt-3">
+              {profile.location && (
+                <div className="flex items-center space-x-1.5">
+                  <MapPin size={13} strokeWidth={1.5} className="text-[#878787]" />
+                  <span>{profile.location}</span>
+                </div>
+              )}
+              {profile.languages && profile.languages.length > 0 && (
+                <div className="flex items-center space-x-1.5">
+                  <Globe size={13} strokeWidth={1.5} className="text-[#878787]" />
+                  <span>{profile.languages.join(", ")}</span>
+                </div>
+              )}
             </div>
-            <div className="text-[#A8A8A8]">
-              <span className="font-semibold text-[#E6E6E6]">
+          )}
+
+          {/* Instagram-style Stat Row: posts, followers, following */}
+          <div className="flex items-center space-x-8 pt-4 border-t border-[#2B2D2D] mt-4 font-mono">
+            <div>
+              <div className="font-semibold text-sm text-[#E6E6E6]">{postCount}</div>
+              <div className="text-[11px] text-[#A8A8A8] font-sans">posts</div>
+            </div>
+            <div>
+              <div className="font-semibold text-sm text-[#E6E6E6]">{followerCount}</div>
+              <div className="text-[11px] text-[#A8A8A8] font-sans">followers</div>
+            </div>
+            <div>
+              <div className="font-semibold text-sm text-[#E6E6E6]">
                 {profile.following_count ?? 0}
-              </span>{" "}
-              following
+              </div>
+              <div className="text-[11px] text-[#A8A8A8] font-sans">following</div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* 2. About / Bio Section */}
-      {profile.bio && (
-        <section className="bg-[#1C1E1E] border border-[#2B2D2D] p-5 sm:p-6 space-y-3 rounded-2xl shadow-sm">
-          <h2 className="text-xs uppercase tracking-wider font-semibold text-[#878787] font-mono">
-            Artist Statement & Vision
-          </h2>
-          <p className="text-sm text-[#E6E6E6] leading-relaxed whitespace-pre-line font-sans">
-            {profile.bio}
-          </p>
-        </section>
-      )}
+      {/* 2. Tabs: Posts and About */}
+      <div className="flex border-b border-[#303232] pt-2">
+        <button
+          type="button"
+          onClick={() => setActiveTab("posts")}
+          className={`pb-3 px-4 text-xs font-semibold uppercase tracking-wider transition-colors border-b-2 cursor-pointer ${
+            activeTab === "posts"
+              ? "border-[#E6E6E6] text-[#E6E6E6]"
+              : "border-transparent text-[#878787] hover:text-[#A8A8A8]"
+          }`}
+        >
+          Posts
+        </button>
+        <button
+          type="button"
+          onClick={() => setActiveTab("about")}
+          className={`pb-3 px-4 text-xs font-semibold uppercase tracking-wider transition-colors border-b-2 cursor-pointer ${
+            activeTab === "about"
+              ? "border-[#E6E6E6] text-[#E6E6E6]"
+              : "border-transparent text-[#878787] hover:text-[#A8A8A8]"
+          }`}
+        >
+          About
+        </button>
+      </div>
 
-      {/* 3. Featured Works */}
-      <section className="bg-[#1C1E1E] border border-[#2B2D2D] p-5 sm:p-6 space-y-4 rounded-2xl shadow-sm">
-        <div className="flex items-center justify-between">
-          <h2 className="text-xs uppercase tracking-wider font-semibold text-[#878787] font-mono">
-            Featured
-          </h2>
-          {currentUserId === profile.id && (
-            <Link
-              href="/settings/profile"
-              className="text-xs font-mono text-[#6C86FF] hover:underline"
-            >
-              Edit
-            </Link>
+      {/* 3. Tab Content */}
+      {activeTab === "posts" ? (
+        <div className="pt-1">
+          {totalPostsCount === 0 ? (
+            <div className="py-16 text-center space-y-3">
+              <p className="text-sm text-[#878787]">No posts.</p>
+              {currentUserId === profile.id && (
+                <Link
+                  href="/post"
+                  className="inline-block px-4 py-2 text-xs font-semibold bg-[#002EC1] hover:bg-[#1F4BE0] active:bg-[#0021A0] text-[#E6E6E6] transition-colors"
+                >
+                  Post
+                </Link>
+              )}
+            </div>
+          ) : (
+            <>
+              <div className="grid grid-cols-3 gap-[2px]">
+                {featuredFilms.map((film) => renderTile(film, true))}
+                {unpinnedPosts.map((film) => renderTile(film, false))}
+                {isLoadingMore && (
+                  <>
+                    <div className="aspect-square bg-[#232525] animate-pulse" />
+                    <div className="aspect-square bg-[#232525] animate-pulse" />
+                    <div className="aspect-square bg-[#232525] animate-pulse" />
+                  </>
+                )}
+              </div>
+              <div ref={loadMoreRef} className="h-6" />
+            </>
           )}
         </div>
+      ) : (
+        <div className="pt-2 space-y-6">
+          {experience.length === 0 && (!profile.skills || profile.skills.length === 0) ? (
+            <p className="text-xs text-[#878787] py-8 text-center">Nothing yet.</p>
+          ) : (
+            <>
+              {experience.length > 0 && (
+                <div className="space-y-3">
+                  <h2 className="text-xs uppercase tracking-wider font-semibold text-[#878787] font-mono">
+                    Experience
+                  </h2>
+                  <div className="space-y-3 divide-y divide-[#2B2D2D]">
+                    {experience.map((exp) => (
+                      <div key={exp.id} className="pt-3 first:pt-0 space-y-1">
+                        <div className="flex items-start justify-between">
+                          <div>
+                            <h3 className="text-sm font-semibold text-[#E6E6E6]">
+                              {exp.title}
+                            </h3>
+                            <p className="text-xs text-[#A8A8A8]">{exp.org_or_project}</p>
+                          </div>
+                          <span className="text-[11px] text-[#878787] font-mono">
+                            {exp.start_year} — {exp.end_year ?? "Present"}
+                          </span>
+                        </div>
 
-        {featuredFilms && featuredFilms.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
-            {featuredFilms.map((film) => (
-              <Link
-                key={film.id}
-                href={`/f/${film.id}`}
-                className="group block bg-[#242626] border border-[#303232] hover:border-[#6C86FF]/50 transition-all rounded-xl overflow-hidden shadow-sm"
-              >
-                <div className="relative aspect-video w-full bg-[#000000] overflow-hidden flex items-center justify-center">
-                  {film.thumbnail_url || film.youtube_id || (film.media_urls && film.media_urls.length > 0) ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img
-                      src={
-                        film.thumbnail_url ||
-                        (film.youtube_id
-                          ? `https://img.youtube.com/vi/${film.youtube_id}/hqdefault.jpg`
-                          : film.media_urls?.[0] || "")
-                      }
-                      alt={film.title}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                    />
-                  ) : (
-                    <div className="w-full h-full flex flex-col items-center justify-center bg-[#1A1C1C] p-3 text-center space-y-1">
-                      <FileText className="w-5 h-5 text-[#6C86FF]" />
-                      <span className="text-[11px] font-mono text-[#A8A8A8] truncate max-w-full px-2">{film.title}</span>
-                    </div>
-                  )}
-                </div>
-                <div className="p-3 space-y-1">
-                  <h3 className="font-heading text-sm text-[#E6E6E6] group-hover:text-[#6C86FF] transition-colors truncate">
-                    {film.title}
-                  </h3>
-                  <p className="text-[11px] font-mono text-[#878787] truncate">
-                    c/{film.category_slug} • {film.like_count || 0} likes
-                  </p>
-                </div>
-              </Link>
-            ))}
-          </div>
-        ) : (
-          <div className="py-8 text-center border border-dashed border-[#303232] rounded-xl space-y-1.5">
-            <Sparkles size={22} strokeWidth={1.5} className="mx-auto text-[#878787]" />
-            <p className="text-xs text-[#A8A8A8]">No featured works yet.</p>
-            {currentUserId === profile.id && (
-              <Link
-                href="/settings/profile"
-                className="inline-block text-xs font-semibold text-[#6C86FF] hover:underline"
-              >
-                Add works
-              </Link>
-            )}
-          </div>
-        )}
-      </section>
+                        {exp.description && (
+                          <p className="text-xs text-[#A8A8A8] leading-relaxed pt-1 font-sans">
+                            {exp.description}
+                          </p>
+                        )}
 
-      {/* 4. Activity Section */}
-      <section className="bg-[#1C1E1E] border border-[#2B2D2D] p-5 sm:p-6 space-y-4 rounded-2xl shadow-sm">
-        <div className="flex items-center justify-between">
-          <h2 className="text-xs uppercase tracking-wider font-semibold text-[#878787] font-mono">
-            Activity
-          </h2>
-          <span className="text-[11px] font-mono text-[#878787]">
-            Uploads
-          </span>
+                        {exp.link && (
+                          <a
+                            href={exp.link}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center space-x-1 text-xs text-[#6C86FF] hover:underline pt-1"
+                          >
+                            <span>Project</span>
+                            <ExternalLink size={11} strokeWidth={1.5} />
+                          </a>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {profile.skills && profile.skills.length > 0 && (
+                <div className="space-y-3">
+                  <h2 className="text-xs uppercase tracking-wider font-semibold text-[#878787] font-mono">
+                    Skills
+                  </h2>
+                  <div className="flex flex-wrap gap-2">
+                    {profile.skills.map((skill, i) => (
+                      <span
+                        key={i}
+                        className="px-3 py-1 text-xs bg-[#242626] border border-[#303232] text-[#E6E6E6]"
+                      >
+                        {skill}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </>
+          )}
         </div>
-
-        {activityFilms && activityFilms.length > 0 ? (
-          <div className="space-y-2.5">
-            {activityFilms.map((film) => (
-              <Link
-                key={film.id}
-                href={`/f/${film.id}`}
-                className="flex items-center justify-between p-3 bg-[#242626] border border-[#303232] hover:border-[#6C86FF]/50 rounded-xl transition-all group"
-              >
-                <div className="flex items-center space-x-3.5 min-w-0 pr-2">
-                  <div className="w-16 h-10 bg-[#000000] rounded-lg shrink-0 overflow-hidden relative border border-[#303232] flex items-center justify-center">
-                    {film.thumbnail_url || film.youtube_id || (film.media_urls && film.media_urls.length > 0) ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img
-                        src={
-                          film.thumbnail_url ||
-                          (film.youtube_id
-                            ? `https://img.youtube.com/vi/${film.youtube_id}/hqdefault.jpg`
-                            : film.media_urls?.[0] || "")
-                        }
-                        alt={film.title}
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      <FileText className="w-4 h-4 text-[#878787]" />
-                    )}
-                  </div>
-                  <div className="min-w-0">
-                    <h3 className="font-heading text-sm text-[#E6E6E6] group-hover:text-[#6C86FF] transition-colors truncate">
-                      {film.title}
-                    </h3>
-                    <p className="text-[11px] font-mono text-[#878787] truncate">
-                      c/{film.category_slug}
-                    </p>
-                  </div>
-                </div>
-
-                <div className="text-[11px] font-mono text-[#878787] shrink-0 text-right">
-                  <div>{film.like_count || 0} likes</div>
-                </div>
-              </Link>
-            ))}
-          </div>
-        ) : (
-          <div className="py-8 text-center border border-dashed border-[#303232] rounded-xl">
-            <p className="text-xs text-[#A8A8A8]">No activity yet.</p>
-          </div>
-        )}
-      </section>
-
-      {/* 5. Creative Experience Section */}
-      <section className="bg-[#1C1E1E] border border-[#2B2D2D] p-5 sm:p-6 space-y-4 rounded-2xl shadow-sm">
-        <h2 className="text-xs uppercase tracking-wider font-semibold text-[#878787] font-mono">
-          Experience
-        </h2>
-
-        {experience.length > 0 ? (
-          <div className="space-y-4 divide-y divide-[#2B2D2D]">
-            {experience.map((exp) => (
-              <div key={exp.id} className="pt-3.5 first:pt-0 space-y-1">
-                <div className="flex items-start justify-between">
-                  <div>
-                    <h3 className="text-sm font-semibold text-[#E6E6E6]">
-                      {exp.title}
-                    </h3>
-                    <p className="text-xs text-[#A8A8A8]">{exp.org_or_project}</p>
-                  </div>
-                  <span className="text-[11px] text-[#878787] font-mono">
-                    {exp.start_year} — {exp.end_year ?? "Present"}
-                  </span>
-                </div>
-
-                {exp.description && (
-                  <p className="text-xs text-[#A8A8A8] leading-relaxed pt-1 font-sans">
-                    {exp.description}
-                  </p>
-                )}
-
-                {exp.link && (
-                  <a
-                    href={exp.link}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center space-x-1 text-xs text-[#6C86FF] hover:underline pt-1"
-                  >
-                    <span>Project</span>
-                    <ExternalLink size={11} strokeWidth={1.5} />
-                  </a>
-                )}
-              </div>
-            ))}
-          </div>
-        ) : (
-          <p className="text-xs text-[#878787]">No experience yet.</p>
-        )}
-      </section>
-
-      {/* 6. Artistic Skills Section */}
-      <section className="bg-[#1C1E1E] border border-[#2B2D2D] p-5 sm:p-6 space-y-3 rounded-2xl shadow-sm">
-        <h2 className="text-xs uppercase tracking-wider font-semibold text-[#878787] font-mono">
-          Skills
-        </h2>
-
-        {profile.skills && profile.skills.length > 0 ? (
-          <div className="flex flex-wrap gap-2">
-            {profile.skills.map((skill, i) => (
-              <span
-                key={i}
-                className="px-3 py-1 text-xs bg-[#242626] border border-[#303232] text-[#E6E6E6] rounded-full"
-              >
-                {skill}
-              </span>
-            ))}
-          </div>
-        ) : (
-          <p className="text-xs text-[#878787]">No skills yet.</p>
-        )}
-      </section>
+      )}
     </div>
   );
 }

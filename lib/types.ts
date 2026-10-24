@@ -79,6 +79,16 @@ export interface FilmWithCreator extends Film {
   user_has_liked?: boolean;
 }
 
+export interface ProfileTileFilm {
+  id: string;
+  title: string;
+  post_type: PostType;
+  thumbnail_url: string | null;
+  youtube_id: string | null;
+  media_urls: string[];
+  created_at: string;
+}
+
 export interface FeaturedFilm {
   profile_id: string;
   film_id: string;
