@@ -15,3 +15,5 @@ export const CATEGORIES: Category[] = [
   { slug: "art-and-design", name: "Art & Design", sortOrder: 8 },
   { slug: "animation-and-vfx", name: "Animation & VFX", sortOrder: 9 },
 ];
+
+export const REPORT_REVIEW_THRESHOLD = 3;
