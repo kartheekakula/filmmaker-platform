@@ -14,6 +14,7 @@ import {
 } from "@/lib/films";
 import { FollowButton } from "@/components/profile/FollowButton";
 import { createClient } from "@/lib/supabase/client";
+import { PostMenu } from "./PostMenu";
 
 interface FilmDetailViewProps {
   film: FilmWithCreator;
@@ -223,12 +224,19 @@ export function FilmDetailView({
           <span>Back</span>
         </button>
 
-        <Link
-          href={`/c/${channelSlug}`}
-          className="text-xs text-[#6C86FF] hover:underline uppercase tracking-wider"
-        >
-          c/{channelName}
-        </Link>
+        <div className="flex items-center space-x-2">
+          <Link
+            href={`/c/${channelSlug}`}
+            className="text-xs text-[#6C86FF] hover:underline uppercase tracking-wider"
+          >
+            c/{channelName}
+          </Link>
+          <PostMenu
+            filmId={film.id}
+            ownerId={film.owner_id}
+            currentUserId={currentUserId}
+          />
+        </div>
       </div>
 
       {/* Main Content Area in place of player */}

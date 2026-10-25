@@ -8,6 +8,7 @@ import { FilmWithCreator } from "@/lib/types";
 import { toggleFilmLike } from "@/lib/films";
 import { useScrollPreview } from "./ScrollPreviewContext";
 import { createClient } from "@/lib/supabase/client";
+import { PostMenu } from "./PostMenu";
 
 interface FilmCardProps {
   film: FilmWithCreator;
@@ -183,13 +184,20 @@ export function FilmCard({ film, currentUserId }: FilmCardProps) {
           </div>
         </div>
 
-        {/* Channel Pill Badge */}
-        <Link
-          href={`/c/${channelSlug}`}
-          className="px-2.5 py-1 rounded-full bg-[#252727] hover:bg-[#2F3131] border border-[#303232] text-[#6C86FF] text-[11px] font-mono uppercase tracking-tight shrink-0 transition-colors"
-        >
-          c/{channelName}
-        </Link>
+        {/* Channel Pill Badge & Post Menu */}
+        <div className="flex items-center space-x-1.5 shrink-0">
+          <Link
+            href={`/c/${channelSlug}`}
+            className="px-2.5 py-1 rounded-full bg-[#252727] hover:bg-[#2F3131] border border-[#303232] text-[#6C86FF] text-[11px] font-mono uppercase tracking-tight transition-colors"
+          >
+            c/{channelName}
+          </Link>
+          <PostMenu
+            filmId={film.id}
+            ownerId={film.owner_id}
+            currentUserId={currentUserId ?? null}
+          />
+        </div>
       </div>
 
       {/* 2. Media Area by Post Type */}
