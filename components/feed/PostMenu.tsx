@@ -2,13 +2,14 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { MoreHorizontal, Flag, Check } from "lucide-react";
+import { MoreHorizontal, Flag, Check, Eye, EyeOff, Ban } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 
 interface PostMenuProps {
   filmId: string;
   ownerId: string;
   currentUserId: string | null;
+  initialIsHidden?: boolean;
   className?: string;
 }
 
@@ -23,6 +24,7 @@ export function PostMenu({
   filmId,
   ownerId,
   currentUserId,
+  initialIsHidden = false,
   className = "",
 }: PostMenuProps) {
   const router = useRouter();
@@ -34,6 +36,8 @@ export function PostMenu({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isRestricted, setIsRestricted] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [isHidden, setIsHidden] = useState(initialIsHidden);
+  const [confirmRestrict, setConfirmRestrict] = useState(false);
 
   const menuRef = useRef<HTMLDivElement>(null);
 
@@ -90,6 +94,7 @@ export function PostMenu({
       if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
         setMenuOpen(false);
         setShowReasons(false);
+        setConfirmRestrict(false);
       }
     }
 
@@ -97,6 +102,7 @@ export function PostMenu({
       if (e.key === "Escape") {
         setMenuOpen(false);
         setShowReasons(false);
+        setConfirmRestrict(false);
       }
     }
 
@@ -160,6 +166,44 @@ export function PostMenu({
     }
   };
 
+  const handleToggleHide = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const nextHidden = !isHidden;
+    setIsHidden(nextHidden);
+    try {
+      await supabase.rpc("admin_set_post_hidden", {
+        p_film_id: filmId,
+        p_hidden: nextHidden,
+      });
+    } catch (err) {
+      console.error("Failed to toggle post visibility:", err);
+      setIsHidden(!nextHidden);
+    }
+    setMenuOpen(false);
+  };
+
+  const handleToggleRestrict = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!confirmRestrict) {
+      setConfirmRestrict(true);
+      return;
+    }
+
+    try {
+      await supabase.rpc("admin_set_user_restricted", {
+        p_user_id: ownerId,
+        p_restricted: true,
+      });
+    } catch (err) {
+      console.error("Failed to restrict user:", err);
+    } finally {
+      setConfirmRestrict(false);
+      setMenuOpen(false);
+    }
+  };
+
   return (
     <div className={`relative ${className}`} ref={menuRef}>
       <button
@@ -169,6 +213,7 @@ export function PostMenu({
           e.stopPropagation();
           setMenuOpen(!menuOpen);
           setShowReasons(false);
+          setConfirmRestrict(false);
         }}
         aria-label="Post actions"
         className="p-1 text-[#A8A8A8] hover:text-[#E6E6E6] hover:bg-[#2E3030] transition-colors focus:outline-none cursor-pointer"
@@ -210,6 +255,49 @@ export function PostMenu({
                 >
                   <Flag size={14} strokeWidth={1.5} className="text-[#A8A8A8]" />
                   <span>Report</span>
+                </button>
+              )}
+            </>
+          )}
+
+          {/* Quick actions for admins */}
+          {isAdmin && (
+            <>
+              {canReport && <div className="border-t border-[#303232] my-1" />}
+              <button
+                type="button"
+                onClick={handleToggleHide}
+                className="w-full text-left flex items-center space-x-2.5 px-3 py-2 text-xs text-[#E6E6E6] hover:bg-[#2E3030] transition-colors cursor-pointer"
+              >
+                {isHidden ? (
+                  <>
+                    <Eye size={14} strokeWidth={1.5} className="text-[#A8A8A8]" />
+                    <span>Show</span>
+                  </>
+                ) : (
+                  <>
+                    <EyeOff size={14} strokeWidth={1.5} className="text-[#A8A8A8]" />
+                    <span>Hide</span>
+                  </>
+                )}
+              </button>
+
+              {!isOwner && (
+                <button
+                  type="button"
+                  onClick={handleToggleRestrict}
+                  className={`w-full text-left flex items-center space-x-2.5 px-3 py-2 text-xs transition-colors cursor-pointer ${
+                    confirmRestrict
+                      ? "bg-red-950/40 text-red-400"
+                      : "text-[#E6E6E6] hover:bg-[#2E3030]"
+                  }`}
+                >
+                  <Ban
+                    size={14}
+                    strokeWidth={1.5}
+                    className={confirmRestrict ? "text-red-400" : "text-[#A8A8A8]"}
+                  />
+                  <span>{confirmRestrict ? "Sure?" : "Restrict"}</span>
                 </button>
               )}
             </>

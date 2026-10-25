@@ -77,23 +77,48 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
     hasMore: initialHasMore,
   } = await getUserPosts(supabase, profile.id, { limit: 12 });
 
-  // 4. Current Authenticated User & Follow Status
+  // 4. Current Authenticated User & Follow Status & Admin Check
   const {
     data: { user: currentUser },
   } = await supabase.auth.getUser();
 
   let initialIsFollowing = false;
-  if (currentUser && currentUser.id !== profile.id) {
-    const { data: followRecord } = await supabase
-      .from("follows")
-      .select("follower_id")
-      .eq("follower_id", currentUser.id)
-      .eq("following_id", profile.id)
-      .maybeSingle();
+  let currentUserIsAdmin = false;
+  if (currentUser) {
+    if (currentUser.id !== profile.id) {
+      const { data: followRecord } = await supabase
+        .from("follows")
+        .select("follower_id")
+        .eq("follower_id", currentUser.id)
+        .eq("following_id", profile.id)
+        .maybeSingle();
 
-    if (followRecord) {
-      initialIsFollowing = true;
+      if (followRecord) {
+        initialIsFollowing = true;
+      }
     }
+
+    try {
+      const { data: adminRecord } = await supabase
+        .from("admins")
+        .select("user_id")
+        .eq("user_id", currentUser.id)
+        .maybeSingle();
+      currentUserIsAdmin = !!adminRecord;
+    } catch {
+      currentUserIsAdmin = false;
+    }
+  }
+
+  // 5. Check if profile is restricted
+  let isProfileRestricted = false;
+  try {
+    const { data: restricted } = await supabase.rpc("is_restricted", {
+      uid: profile.id,
+    });
+    isProfileRestricted = !!restricted;
+  } catch {
+    isProfileRestricted = false;
   }
 
   return (
@@ -106,6 +131,8 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
         experience={(experienceData ?? []) as ProfileExperience[]}
         initialIsFollowing={initialIsFollowing}
         currentUserId={currentUser?.id ?? null}
+        currentUserIsAdmin={currentUserIsAdmin}
+        isProfileRestricted={isProfileRestricted}
         featuredFilms={featuredFilms}
         initialPosts={initialPosts}
         initialNextCursor={initialNextCursor}

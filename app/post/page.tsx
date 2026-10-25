@@ -20,6 +20,7 @@ export default function PostPage() {
   const [supabase] = useState(() => createClient());
 
   const [currentUser, setCurrentUser] = useState<Profile | null>(null);
+  const [isRestricted, setIsRestricted] = useState(false);
   const [authChecked, setAuthChecked] = useState(false);
   const [categories, setCategories] = useState<Category[]>([]);
 
@@ -62,6 +63,16 @@ export default function PostPage() {
         .single();
 
       setCurrentUser(profile as Profile);
+
+      try {
+        const { data: restricted } = await supabase.rpc("is_restricted", {
+          uid: user.id,
+        });
+        if (restricted) setIsRestricted(true);
+      } catch {
+        // RPC might not be deployed yet
+      }
+
       setAuthChecked(true);
 
       const cats = await getCategories(supabase);
@@ -303,6 +314,16 @@ export default function PostPage() {
               Sign in
             </Link>
           </div>
+        </div>
+      </AppLayout>
+    );
+  }
+
+  if (isRestricted) {
+    return (
+      <AppLayout title="Post">
+        <div className="py-20 text-center text-sm text-[#878787]">
+          Account restricted
         </div>
       </AppLayout>
     );

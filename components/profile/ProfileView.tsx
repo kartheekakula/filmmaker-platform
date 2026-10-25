@@ -4,7 +4,7 @@ import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import type { Profile, ProfileExperience, Film, ProfileTileFilm } from "@/lib/types";
 import { FollowButton } from "./FollowButton";
-import { MapPin, Globe, ExternalLink, Pin, Play, Layers, FileText } from "lucide-react";
+import { MapPin, Globe, ExternalLink, Pin, Play, Layers, FileText, MoreHorizontal, RotateCcw, Ban } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { FeedCursor, getUserPosts } from "@/lib/films";
 
@@ -13,6 +13,8 @@ interface ProfileViewProps {
   experience: ProfileExperience[];
   initialIsFollowing: boolean;
   currentUserId: string | null;
+  currentUserIsAdmin?: boolean;
+  isProfileRestricted?: boolean;
   featuredFilms?: Film[];
   initialPosts?: ProfileTileFilm[];
   initialNextCursor?: FeedCursor | null;
@@ -25,6 +27,8 @@ export function ProfileView({
   experience,
   initialIsFollowing,
   currentUserId,
+  currentUserIsAdmin = false,
+  isProfileRestricted = false,
   featuredFilms = [],
   initialPosts = [],
   initialNextCursor = null,
@@ -34,6 +38,73 @@ export function ProfileView({
   const [supabase] = useState(() => createClient());
   const [followerCount, setFollowerCount] = useState(profile.follower_count ?? 0);
   const [activeTab, setActiveTab] = useState<"posts" | "about">("posts");
+
+  const [isRestricted, setIsRestricted] = useState(isProfileRestricted);
+  const [adminMenuOpen, setAdminMenuOpen] = useState(false);
+  const [confirmRestrictUser, setConfirmRestrictUser] = useState(false);
+  const adminMenuRef = useRef<HTMLDivElement>(null);
+
+  // Sync isProfileRestricted prop
+  useEffect(() => {
+    setIsRestricted(isProfileRestricted);
+  }, [isProfileRestricted]);
+
+  // Click outside admin menu
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (adminMenuRef.current && !adminMenuRef.current.contains(e.target as Node)) {
+        setAdminMenuOpen(false);
+        setConfirmRestrictUser(false);
+      }
+    }
+    function handleKeyDown(e: KeyboardEvent) {
+      if (e.key === "Escape") {
+        setAdminMenuOpen(false);
+        setConfirmRestrictUser(false);
+      }
+    }
+    if (adminMenuOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+      document.addEventListener("keydown", handleKeyDown);
+    }
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [adminMenuOpen]);
+
+  const handleLiftUserRestriction = async () => {
+    try {
+      await supabase.rpc("admin_set_user_restricted", {
+        p_user_id: profile.id,
+        p_restricted: false,
+      });
+      setIsRestricted(false);
+    } catch (err) {
+      console.error("Failed to lift restriction:", err);
+    } finally {
+      setAdminMenuOpen(false);
+    }
+  };
+
+  const handleRestrictUser = async () => {
+    if (!confirmRestrictUser) {
+      setConfirmRestrictUser(true);
+      return;
+    }
+    try {
+      await supabase.rpc("admin_set_user_restricted", {
+        p_user_id: profile.id,
+        p_restricted: true,
+      });
+      setIsRestricted(true);
+    } catch (err) {
+      console.error("Failed to restrict user:", err);
+    } finally {
+      setConfirmRestrictUser(false);
+      setAdminMenuOpen(false);
+    }
+  };
 
   // Posts state
   const [posts, setPosts] = useState<ProfileTileFilm[]>(initialPosts);
@@ -180,7 +251,7 @@ export function ProfileView({
               )}
             </div>
 
-            <div className="pt-2">
+            <div className="pt-2 flex items-center space-x-2">
               <FollowButton
                 targetUserId={profile.id}
                 initialIsFollowing={initialIsFollowing}
@@ -188,6 +259,54 @@ export function ProfileView({
                 username={profile.username}
                 onFollowChange={handleFollowChange}
               />
+
+              {currentUserIsAdmin && currentUserId !== profile.id && (
+                <div className="relative" ref={adminMenuRef}>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setAdminMenuOpen(!adminMenuOpen);
+                      setConfirmRestrictUser(false);
+                    }}
+                    aria-label="Admin user actions"
+                    className="p-2 text-[#A8A8A8] hover:text-[#E6E6E6] bg-[#242626] hover:bg-[#2E3030] border border-[#303232] transition-colors cursor-pointer"
+                  >
+                    <MoreHorizontal size={16} strokeWidth={1.5} />
+                  </button>
+
+                  {adminMenuOpen && (
+                    <div className="absolute right-0 top-full mt-1 w-36 bg-[#232525] border border-[#303232] shadow-2xl py-1 z-50 animate-in fade-in zoom-in-95 duration-100">
+                      {isRestricted ? (
+                        <button
+                          type="button"
+                          onClick={handleLiftUserRestriction}
+                          className="w-full text-left flex items-center space-x-2 px-3 py-2 text-xs text-[#E6E6E6] hover:bg-[#2E3030] transition-colors cursor-pointer"
+                        >
+                          <RotateCcw size={14} strokeWidth={1.5} className="text-[#A8A8A8]" />
+                          <span>Lift</span>
+                        </button>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={handleRestrictUser}
+                          className={`w-full text-left flex items-center space-x-2 px-3 py-2 text-xs transition-colors cursor-pointer ${
+                            confirmRestrictUser
+                              ? "bg-red-950/40 text-red-400"
+                              : "text-[#E6E6E6] hover:bg-[#2E3030]"
+                          }`}
+                        >
+                          <Ban
+                            size={14}
+                            strokeWidth={1.5}
+                            className={confirmRestrictUser ? "text-red-400" : "text-[#A8A8A8]"}
+                          />
+                          <span>{confirmRestrictUser ? "Sure?" : "Restrict"}</span>
+                        </button>
+                      )}
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           </div>
 
@@ -249,133 +368,142 @@ export function ProfileView({
         </div>
       </section>
 
-      {/* 2. Tabs: Posts and About */}
-      <div className="flex border-b border-[#303232] pt-2">
-        <button
-          type="button"
-          onClick={() => setActiveTab("posts")}
-          className={`pb-3 px-4 text-xs font-semibold uppercase tracking-wider transition-colors border-b-2 cursor-pointer ${
-            activeTab === "posts"
-              ? "border-[#E6E6E6] text-[#E6E6E6]"
-              : "border-transparent text-[#878787] hover:text-[#A8A8A8]"
-          }`}
-        >
-          Posts
-        </button>
-        <button
-          type="button"
-          onClick={() => setActiveTab("about")}
-          className={`pb-3 px-4 text-xs font-semibold uppercase tracking-wider transition-colors border-b-2 cursor-pointer ${
-            activeTab === "about"
-              ? "border-[#E6E6E6] text-[#E6E6E6]"
-              : "border-transparent text-[#878787] hover:text-[#A8A8A8]"
-          }`}
-        >
-          About
-        </button>
-      </div>
+      {/* 2. Content: Account Restricted OR Tabs (Posts and About) */}
+      {isRestricted ? (
+        <div className="py-20 text-center text-sm text-[#878787]">
+          Account restricted
+        </div>
+      ) : (
+        <>
+          {/* Tabs: Posts and About */}
+          <div className="flex border-b border-[#303232] pt-2">
+            <button
+              type="button"
+              onClick={() => setActiveTab("posts")}
+              className={`pb-3 px-4 text-xs font-semibold uppercase tracking-wider transition-colors border-b-2 cursor-pointer ${
+                activeTab === "posts"
+                  ? "border-[#E6E6E6] text-[#E6E6E6]"
+                  : "border-transparent text-[#878787] hover:text-[#A8A8A8]"
+              }`}
+            >
+              Posts
+            </button>
+            <button
+              type="button"
+              onClick={() => setActiveTab("about")}
+              className={`pb-3 px-4 text-xs font-semibold uppercase tracking-wider transition-colors border-b-2 cursor-pointer ${
+                activeTab === "about"
+                  ? "border-[#E6E6E6] text-[#E6E6E6]"
+                  : "border-transparent text-[#878787] hover:text-[#A8A8A8]"
+              }`}
+            >
+              About
+            </button>
+          </div>
 
-      {/* 3. Tab Content */}
-      {activeTab === "posts" ? (
-        <div className="pt-1">
-          {totalPostsCount === 0 ? (
-            <div className="py-16 text-center space-y-3">
-              <p className="text-sm text-[#878787]">No posts.</p>
-              {currentUserId === profile.id && (
-                <Link
-                  href="/post"
-                  className="inline-block px-4 py-2 text-xs font-semibold bg-[#002EC1] hover:bg-[#1F4BE0] active:bg-[#0021A0] text-[#E6E6E6] transition-colors"
-                >
-                  Post
-                </Link>
+          {/* Tab Content */}
+          {activeTab === "posts" ? (
+            <div className="pt-1">
+              {totalPostsCount === 0 ? (
+                <div className="py-16 text-center space-y-3">
+                  <p className="text-sm text-[#878787]">No posts.</p>
+                  {currentUserId === profile.id && (
+                    <Link
+                      href="/post"
+                      className="inline-block px-4 py-2 text-xs font-semibold bg-[#002EC1] hover:bg-[#1F4BE0] active:bg-[#0021A0] text-[#E6E6E6] transition-colors"
+                    >
+                      Post
+                    </Link>
+                  )}
+                </div>
+              ) : (
+                <>
+                  <div className="grid grid-cols-3 gap-[2px]">
+                    {featuredFilms.map((film) => renderTile(film, true))}
+                    {unpinnedPosts.map((film) => renderTile(film, false))}
+                    {isLoadingMore && (
+                      <>
+                        <div className="aspect-square bg-[#232525] animate-pulse" />
+                        <div className="aspect-square bg-[#232525] animate-pulse" />
+                        <div className="aspect-square bg-[#232525] animate-pulse" />
+                      </>
+                    )}
+                  </div>
+                  <div ref={loadMoreRef} className="h-6" />
+                </>
               )}
             </div>
           ) : (
-            <>
-              <div className="grid grid-cols-3 gap-[2px]">
-                {featuredFilms.map((film) => renderTile(film, true))}
-                {unpinnedPosts.map((film) => renderTile(film, false))}
-                {isLoadingMore && (
-                  <>
-                    <div className="aspect-square bg-[#232525] animate-pulse" />
-                    <div className="aspect-square bg-[#232525] animate-pulse" />
-                    <div className="aspect-square bg-[#232525] animate-pulse" />
-                  </>
-                )}
-              </div>
-              <div ref={loadMoreRef} className="h-6" />
-            </>
-          )}
-        </div>
-      ) : (
-        <div className="pt-2 space-y-6">
-          {experience.length === 0 && (!profile.skills || profile.skills.length === 0) ? (
-            <p className="text-xs text-[#878787] py-8 text-center">Nothing yet.</p>
-          ) : (
-            <>
-              {experience.length > 0 && (
-                <div className="space-y-3">
-                  <h2 className="text-xs uppercase tracking-wider font-semibold text-[#878787] font-mono">
-                    Experience
-                  </h2>
-                  <div className="space-y-3 divide-y divide-[#2B2D2D]">
-                    {experience.map((exp) => (
-                      <div key={exp.id} className="pt-3 first:pt-0 space-y-1">
-                        <div className="flex items-start justify-between">
-                          <div>
-                            <h3 className="text-sm font-semibold text-[#E6E6E6]">
-                              {exp.title}
-                            </h3>
-                            <p className="text-xs text-[#A8A8A8]">{exp.org_or_project}</p>
+            <div className="pt-2 space-y-6">
+              {experience.length === 0 && (!profile.skills || profile.skills.length === 0) ? (
+                <p className="text-xs text-[#878787] py-8 text-center">Nothing yet.</p>
+              ) : (
+                <>
+                  {experience.length > 0 && (
+                    <div className="space-y-3">
+                      <h2 className="text-xs uppercase tracking-wider font-semibold text-[#878787] font-mono">
+                        Experience
+                      </h2>
+                      <div className="space-y-3 divide-y divide-[#2B2D2D]">
+                        {experience.map((exp) => (
+                          <div key={exp.id} className="pt-3 first:pt-0 space-y-1">
+                            <div className="flex items-start justify-between">
+                              <div>
+                                <h3 className="text-sm font-semibold text-[#E6E6E6]">
+                                  {exp.title}
+                                </h3>
+                                <p className="text-xs text-[#A8A8A8]">{exp.org_or_project}</p>
+                              </div>
+                              <span className="text-[11px] text-[#878787] font-mono">
+                                {exp.start_year} — {exp.end_year ?? "Present"}
+                              </span>
+                            </div>
+
+                            {exp.description && (
+                              <p className="text-xs text-[#A8A8A8] leading-relaxed pt-1 font-sans">
+                                {exp.description}
+                              </p>
+                            )}
+
+                            {exp.link && (
+                              <a
+                                href={exp.link}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="inline-flex items-center space-x-1 text-xs text-[#6C86FF] hover:underline pt-1"
+                              >
+                                <span>Project</span>
+                                <ExternalLink size={11} strokeWidth={1.5} />
+                              </a>
+                            )}
                           </div>
-                          <span className="text-[11px] text-[#878787] font-mono">
-                            {exp.start_year} — {exp.end_year ?? "Present"}
-                          </span>
-                        </div>
-
-                        {exp.description && (
-                          <p className="text-xs text-[#A8A8A8] leading-relaxed pt-1 font-sans">
-                            {exp.description}
-                          </p>
-                        )}
-
-                        {exp.link && (
-                          <a
-                            href={exp.link}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="inline-flex items-center space-x-1 text-xs text-[#6C86FF] hover:underline pt-1"
-                          >
-                            <span>Project</span>
-                            <ExternalLink size={11} strokeWidth={1.5} />
-                          </a>
-                        )}
+                        ))}
                       </div>
-                    ))}
-                  </div>
-                </div>
-              )}
+                    </div>
+                  )}
 
-              {profile.skills && profile.skills.length > 0 && (
-                <div className="space-y-3">
-                  <h2 className="text-xs uppercase tracking-wider font-semibold text-[#878787] font-mono">
-                    Skills
-                  </h2>
-                  <div className="flex flex-wrap gap-2">
-                    {profile.skills.map((skill, i) => (
-                      <span
-                        key={i}
-                        className="px-3 py-1 text-xs bg-[#242626] border border-[#303232] text-[#E6E6E6]"
-                      >
-                        {skill}
-                      </span>
-                    ))}
-                  </div>
-                </div>
+                  {profile.skills && profile.skills.length > 0 && (
+                    <div className="space-y-3">
+                      <h2 className="text-xs uppercase tracking-wider font-semibold text-[#878787] font-mono">
+                        Skills
+                      </h2>
+                      <div className="flex flex-wrap gap-2">
+                        {profile.skills.map((skill, i) => (
+                          <span
+                            key={i}
+                            className="px-3 py-1 text-xs bg-[#242626] border border-[#303232] text-[#E6E6E6]"
+                          >
+                            {skill}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </>
               )}
-            </>
+            </div>
           )}
-        </div>
+        </>
       )}
     </div>
   );

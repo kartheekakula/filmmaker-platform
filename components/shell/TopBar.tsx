@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Menu, User, Settings, LogOut } from "lucide-react";
+import { Menu, User, Settings, LogOut, Shield } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import type { Profile } from "@/lib/types";
 
@@ -21,6 +21,7 @@ export function TopBar({
   const router = useRouter();
   const supabase = createClient();
   const [profile, setProfile] = useState<Profile | null>(null);
+  const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -42,8 +43,20 @@ export function TopBar({
         if (data) {
           setProfile(data as Profile);
         }
+
+        try {
+          const { data: adminRecord } = await supabase
+            .from("admins")
+            .select("user_id")
+            .eq("user_id", user.id)
+            .maybeSingle();
+          setIsAdmin(!!adminRecord);
+        } catch {
+          setIsAdmin(false);
+        }
       } else {
         setProfile(null);
+        setIsAdmin(false);
       }
       setLoading(false);
     }
@@ -55,6 +68,7 @@ export function TopBar({
     } = supabase.auth.onAuthStateChange((_event, session) => {
       if (!session) {
         setProfile(null);
+        setIsAdmin(false);
       } else {
         loadProfile();
       }
@@ -186,6 +200,17 @@ export function TopBar({
                     <Settings size={15} strokeWidth={1.5} />
                     <span>Edit profile</span>
                   </Link>
+
+                  {isAdmin && (
+                    <Link
+                      href="/admin"
+                      onClick={() => setMenuOpen(false)}
+                      className="flex items-center space-x-2.5 px-3 py-2 text-xs text-[#A8A8A8] hover:text-[#E6E6E6] hover:bg-[#2B2D2D] rounded-xl transition-colors"
+                    >
+                      <Shield size={15} strokeWidth={1.5} />
+                      <span>Admin</span>
+                    </Link>
+                  )}
                 </div>
 
                 <div className="border-t border-[#303232] my-1 mx-2" />

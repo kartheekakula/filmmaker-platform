@@ -13,7 +13,7 @@ A platform for creatives to publish microfilms, written works, and design/artwor
 - AI (from M3) behind one function in `lib/ai/review.ts`
 
 ## Routes
-`/` home feed (all channels, newest first), `/popular`, `/explore`, `/c/[slug]` channel feed, `/f/[id]` film/post, `/u/[username]` profile, `/settings/profile` edit profile, `/post`, `/ai`, `/festivals`, `/collaborate`, `/login`, `/onboarding`.
+`/` home feed (all channels, newest first), `/popular`, `/explore`, `/c/[slug]` channel feed, `/f/[id]` film/post, `/u/[username]` profile, `/settings/profile` edit profile, `/post`, `/admin`, `/ai`, `/festivals`, `/collaborate`, `/login`, `/onboarding`.
 
 ## Design system (mobile first, minimal, quiet, in the spirit of Reddit, Medium and Substack's dark look)
 - **Layout:** top bar with a hamburger (left, opens the channel drawer), a title (Home or the channel name) and a square profile avatar (right, opens the profile menu). Film cards in a single feed column. Fixed bottom tab bar with four tabs: Film Festivals, Collaborate, Post, AI feedback. Post is the only filled blue element in the bar. On desktop the drawer becomes a persistent left sidebar (240px) and the feed column is centred (max 680px).
@@ -42,8 +42,15 @@ A platform for creatives to publish microfilms, written works, and design/artwor
 
 ## Security and RLS (non-negotiable)
 RLS on every table.
-- `profiles`, `profile_experience`, `featured_films`, `follows`, `categories`, `films`, `likes`: readable by everyone. Writes only by the owner (`auth.uid()` matches the owner column). `follows` insert requires `follower_id = auth.uid()` and `follower_id <> following_id`. `categories` has no client writes.
-- `comments`: readable by everyone. Insert and delete only by author (`auth.uid() = author_id`).
+- `profiles`, `profile_experience`, `featured_films`, `follows`, `categories`, `likes`: readable by everyone. Writes only by the owner (`auth.uid()` matches the owner column). `follows` insert requires `follower_id = auth.uid()` and `follower_id <> following_id`. `categories` has no client writes.
+- `films`: readable if not hidden (`is_hidden = false`), or owned by viewer (`auth.uid() = owner_id`), or viewer is admin (`public.is_admin()`). Writes only by owner.
+- `admins`: readable by owner row only (`auth.uid() = user_id`). No client writes.
+- `restrictions`: readable by admins only (`public.is_admin()`). No client writes. `public.is_restricted(uid)` is callable by everyone.
+- `reports`: insert only as yourself on another's post when not restricted; select own rows or all for admins. No client updates or deletes.
+- Restricted accounts: read-only. Blocked from inserting into `films`, `comments`, `likes`, `follows`, and `reports`.
+- Counter and moderation protection: `BEFORE UPDATE` triggers prevent clients (`current_user in ('authenticated', 'anon')`) from modifying counter columns (`like_count`, `comment_count`, `view_count`, `follower_count`, `following_count`) or moderation columns (`is_hidden`, `hidden_reason`).
+- Admin actions via SECURITY DEFINER RPCs only: `admin_set_post_hidden`, `admin_dismiss_reports`, `admin_set_user_restricted` (cannot restrict self or admin), `admin_delete_comment`, `admin_report_queue`.
+- `comments`: readable by everyone. Insert and delete only by author (`auth.uid() = author_id`), or deleted by admins via `admin_delete_comment`.
 - `ai_reviews`: owner can read and insert only.
 - `waitlist` and `events`: anyone can insert, nobody can read from the client.
 - Storage buckets `avatars`, `banners`, and `post-images`: public read, write only inside the folder named after the user's id, images only, 2 MB (avatars) and 4 MB (banners, post-images) limits.
@@ -55,9 +62,12 @@ RLS on every table.
 - `featured_films`: profile_id, film_id, position (max 3 per profile)
 - `follows`: follower_id, following_id, created_at (primary key on the pair, index on both columns)
 - `categories`: slug, name, sort_order. Seed: direction, writing, cinematography, editing, acting, music-and-sound, production, art-and-design, animation-and-vfx
-- `films`: id, owner_id, title, caption, genre, language, post_type ('video' | 'writing' | 'image'), body text, media_urls text[], duration_seconds (for video: check 1 to 180), source_type ('youtube' or null), video_url, youtube_id, thumbnail_url, preview_start_seconds (default 0), category_slug (required, references categories), like_count, view_count, comment_count, created_at. Index on (category_slug, created_at desc), (post_type, created_at desc), and (created_at desc)
+- `films`: id, owner_id, title, caption, genre, language, post_type ('video' | 'writing' | 'image'), body text, media_urls text[], duration_seconds (for video: check 1 to 180), source_type ('youtube' or null), video_url, youtube_id, thumbnail_url, preview_start_seconds (default 0), category_slug (required, references categories), like_count, view_count, comment_count, is_hidden boolean default false, hidden_reason text ('admin' | 'account' | null), created_at. Index on (category_slug, created_at desc), (post_type, created_at desc), and (created_at desc)
 - `comments`: id, film_id (references films), author_id (references profiles), body (max 1000), created_at. Index on (film_id, created_at desc) and (author_id)
 - `likes`: film_id, user_id (unique pair)
+- `admins`: user_id (primary key references profiles(id) on delete cascade)
+- `restrictions`: user_id (primary key references profiles(id) on delete cascade), created_by, created_at
+- `reports`: id, film_id (references films), reporter_id (references profiles), reason ('spam' | 'off_topic' | 'abuse' | 'other'), status ('open' | 'dismissed' | 'actioned' default 'open'), created_at. Unique on (film_id, reporter_id). Indexes on (status, film_id) and reporter_id
 - `ai_reviews`: id, user_id, script_text, result jsonb, provider, created_at
 - `waitlist`: id, email, feature ('festivals' or 'collaborate'), created_at
 - `events`: id, user_id nullable, name, props jsonb, created_at

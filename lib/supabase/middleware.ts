@@ -49,7 +49,8 @@ export async function updateSession(request: NextRequest) {
   const isProtected =
     pathname.startsWith("/settings") ||
     pathname.startsWith("/onboarding") ||
-    pathname === "/post";
+    pathname === "/post" ||
+    pathname.startsWith("/admin");
 
   if (isProtected && !user) {
     const loginUrl = new URL("/login", request.url);

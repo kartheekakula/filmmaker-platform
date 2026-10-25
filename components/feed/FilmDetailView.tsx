@@ -69,6 +69,26 @@ export function FilmDetailView({
   const [nextCursor, setNextCursor] = useState<{ created_at: string; id: string } | null>(null);
   const [hasMoreComments, setHasMoreComments] = useState<boolean>(false);
   const [loadingMore, setLoadingMore] = useState<boolean>(false);
+  const [isAdmin, setIsAdmin] = useState<boolean>(false);
+  const [isRestricted, setIsRestricted] = useState<boolean>(false);
+
+  // Check admin role and restricted status
+  useEffect(() => {
+    if (!currentUserId) return;
+    async function checkRole() {
+      try {
+        const { data: adminData } = await supabase.rpc("is_admin");
+        if (adminData) setIsAdmin(true);
+        const { data: restrictedData } = await supabase.rpc("is_restricted", {
+          uid: currentUserId,
+        });
+        if (restrictedData) setIsRestricted(true);
+      } catch {
+        // RPCs might not be available before migration
+      }
+    }
+    checkRole();
+  }, [currentUserId, supabase]);
 
   const postType = film.post_type || "video";
 
@@ -192,12 +212,18 @@ export function FilmDetailView({
     }
   };
 
-  const handleDeleteComment = async (commentId: string) => {
+  const handleDeleteComment = async (commentId: string, isAuthor: boolean) => {
     if (!currentUserId || deletingId) return;
 
     setDeletingId(commentId);
     try {
-      await deleteFilmComment(supabase, commentId, currentUserId);
+      if (isAuthor) {
+        await deleteFilmComment(supabase, commentId, currentUserId);
+      } else if (isAdmin) {
+        await supabase.rpc("admin_delete_comment", {
+          p_comment_id: commentId,
+        });
+      }
       setComments((prev) => prev.filter((c) => c.id !== commentId));
       setCommentCount((prev) => Math.max(0, prev - 1));
     } catch (err) {
@@ -380,44 +406,50 @@ export function FilmDetailView({
 
         {/* Comment Input */}
         {currentUserId ? (
-          <form onSubmit={handleAddComment} className="space-y-2">
-            <div className="relative">
-              <textarea
-                value={commentInput}
-                onChange={(e) => setCommentInput(e.target.value)}
-                maxLength={1000}
-                rows={3}
-                placeholder="Write a comment..."
-                className="w-full px-3.5 py-2.5 bg-[#1A1C1C] border border-[#303232] text-[#E6E6E6] placeholder-[#878787] text-sm focus:outline-none focus:border-[#6C86FF] rounded-xl resize-none transition-colors"
-              />
-              <div className="flex items-center justify-between pt-1">
-                <span className="text-[10px] font-mono text-[#878787]">
-                  {commentInput.length}/1000
-                </span>
-                <button
-                  type="submit"
-                  disabled={!commentInput.trim() || submittingComment}
-                  className="px-4 py-1.5 bg-[#002EC1] hover:bg-[#1F4BE0] active:bg-[#0021A0] disabled:opacity-50 disabled:cursor-not-allowed text-[#E6E6E6] text-xs font-semibold rounded-lg flex items-center space-x-1.5 transition-colors cursor-pointer"
-                >
-                  {submittingComment ? (
-                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                  ) : (
-                    <Send className="w-3.5 h-3.5" />
-                  )}
-                  <span>Comment</span>
-                </button>
-              </div>
+          isRestricted ? (
+            <div className="p-4 bg-[#1A1C1C] border border-[#303232] text-center text-xs text-[#878787]">
+              Account restricted
             </div>
-            {commentError && (
-              <p className="text-xs text-red-400 font-mono">{commentError}</p>
-            )}
-          </form>
+          ) : (
+            <form onSubmit={handleAddComment} className="space-y-2">
+              <div className="relative">
+                <textarea
+                  value={commentInput}
+                  onChange={(e) => setCommentInput(e.target.value)}
+                  maxLength={1000}
+                  rows={3}
+                  placeholder="Write a comment..."
+                  className="w-full px-3.5 py-2.5 bg-[#1A1C1C] border border-[#303232] text-[#E6E6E6] placeholder-[#878787] text-sm focus:outline-none focus:border-[#6C86FF] resize-none transition-colors"
+                />
+                <div className="flex items-center justify-between pt-1">
+                  <span className="text-[10px] font-mono text-[#878787]">
+                    {commentInput.length}/1000
+                  </span>
+                  <button
+                    type="submit"
+                    disabled={!commentInput.trim() || submittingComment}
+                    className="px-4 py-1.5 bg-[#002EC1] hover:bg-[#1F4BE0] active:bg-[#0021A0] disabled:opacity-50 disabled:cursor-not-allowed text-[#E6E6E6] text-xs font-semibold flex items-center space-x-1.5 transition-colors cursor-pointer"
+                  >
+                    {submittingComment ? (
+                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                    ) : (
+                      <Send className="w-3.5 h-3.5" />
+                    )}
+                    <span>Comment</span>
+                  </button>
+                </div>
+              </div>
+              {commentError && (
+                <p className="text-xs text-red-400 font-mono">{commentError}</p>
+              )}
+            </form>
+          )
         ) : (
-          <div className="p-4 bg-[#1A1C1C] border border-[#303232] rounded-xl flex items-center justify-between">
+          <div className="p-4 bg-[#1A1C1C] border border-[#303232] flex items-center justify-between">
             <p className="text-xs text-[#A8A8A8]">Sign in to comment.</p>
             <Link
               href={`/login?next=/f/${film.id}`}
-              className="px-3.5 py-1.5 bg-[#002EC1] hover:bg-[#1F4BE0] text-[#E6E6E6] text-xs font-semibold rounded-lg transition-colors"
+              className="px-3.5 py-1.5 bg-[#002EC1] hover:bg-[#1F4BE0] text-[#E6E6E6] text-xs font-semibold transition-colors"
             >
               Sign in
             </Link>
@@ -448,7 +480,8 @@ export function FilmDetailView({
           <div className="space-y-3 pt-1">
             {comments.map((comment) => {
               const author = comment.profiles;
-              const isOwner = currentUserId === comment.author_id;
+              const isAuthor = currentUserId === comment.author_id;
+              const canDelete = isAuthor || isAdmin;
 
               return (
                 <div
@@ -486,10 +519,10 @@ export function FilmDetailView({
                       </div>
                     </Link>
 
-                    {isOwner && (
+                    {canDelete && (
                       <button
                         type="button"
-                        onClick={() => handleDeleteComment(comment.id)}
+                        onClick={() => handleDeleteComment(comment.id, isAuthor)}
                         disabled={deletingId === comment.id}
                         className="text-[#878787] hover:text-red-400 p-1 transition-colors cursor-pointer"
                         aria-label="Delete comment"
