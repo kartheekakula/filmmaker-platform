@@ -18,6 +18,17 @@ export default async function AdminPage() {
     notFound();
   }
 
+  // Admin access is restricted exclusively to the account 'kartheekakula'
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("username")
+    .eq("id", user.id)
+    .maybeSingle();
+
+  if (!profile || profile.username?.toLowerCase() !== "kartheekakula") {
+    notFound();
+  }
+
   const { data: adminRecord } = await supabase
     .from("admins")
     .select("user_id")
@@ -29,7 +40,7 @@ export default async function AdminPage() {
   }
 
   return (
-    <AppLayout title="Admin" maxWidth="max-w-[760px]">
+    <AppLayout title="Admin" maxWidth="max-w-5xl">
       <AdminDashboard />
     </AppLayout>
   );

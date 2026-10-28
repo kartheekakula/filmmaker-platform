@@ -50,7 +50,8 @@ export function TopBar({
             .select("user_id")
             .eq("user_id", user.id)
             .maybeSingle();
-          setIsAdmin(!!adminRecord);
+          const isKartheek = data?.username?.toLowerCase() === "kartheekakula";
+          setIsAdmin(!!adminRecord && isKartheek);
         } catch {
           setIsAdmin(false);
         }

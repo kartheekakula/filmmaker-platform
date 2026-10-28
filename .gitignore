@@ -15,6 +15,8 @@ dist/
 # misc
 .DS_Store
 *.pem
+*.html
+*_files/
 
 # debug
 npm-debug.log*

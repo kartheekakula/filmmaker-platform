@@ -1,5 +1,7 @@
 # Antigravity pack (v3.3, dark Substack-style palette with our blue)
 
+> **Architecture & Briefing:** For a full overview of the product, design system, and technical architecture, see [arkee-briefing-and-architecture.md](arkee-briefing-and-architecture.md).
+
 Order: AGENTS.md at the repo root, then run M0, M1, M2 in order, one at a time. Review each plan before approving, test with the "Done when" list, commit, then move on.
 
 | Milestone | What | Estimated effort |

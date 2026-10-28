@@ -104,7 +104,14 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
         .select("user_id")
         .eq("user_id", currentUser.id)
         .maybeSingle();
-      currentUserIsAdmin = !!adminRecord;
+      const { data: currentProfile } = await supabase
+        .from("profiles")
+        .select("username")
+        .eq("id", currentUser.id)
+        .maybeSingle();
+      currentUserIsAdmin =
+        !!adminRecord &&
+        currentProfile?.username?.toLowerCase() === "kartheekakula";
     } catch {
       currentUserIsAdmin = false;
     }
