@@ -18,14 +18,14 @@ export default async function AdminPage() {
     notFound();
   }
 
-  // Admin access is restricted exclusively to the account 'kartheekakula'
+  // Admin access is restricted exclusively to the account 'kartheekakulaa'
   const { data: profile } = await supabase
     .from("profiles")
     .select("username")
     .eq("id", user.id)
     .maybeSingle();
 
-  if (!profile || profile.username?.toLowerCase() !== "kartheekakula") {
+  if (!profile || profile.username?.toLowerCase() !== "kartheekakulaa") {
     notFound();
   }
 

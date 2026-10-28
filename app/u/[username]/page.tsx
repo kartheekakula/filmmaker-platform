@@ -111,7 +111,7 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
         .maybeSingle();
       currentUserIsAdmin =
         !!adminRecord &&
-        currentProfile?.username?.toLowerCase() === "kartheekakula";
+        currentProfile?.username?.toLowerCase() === "kartheekakulaa";
     } catch {
       currentUserIsAdmin = false;
     }
