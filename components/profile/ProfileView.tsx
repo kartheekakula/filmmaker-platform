@@ -217,9 +217,9 @@ export function ProfileView({
   };
 
   return (
-    <div className="space-y-4">
-      {/* 1. Header (banner & avatar kept exactly as they work now) */}
-      <section className="bg-[#1C1E1E] border border-[#2B2D2D] overflow-hidden rounded-2xl shadow-sm">
+    <div className="space-y-6">
+      {/* 1. Header */}
+      <section className="bg-[#232525] border border-[#303232] overflow-hidden">
         {/* Banner */}
         <div className="w-full h-36 sm:h-48 bg-[#002EC1] relative overflow-hidden">
           {profile.banner_url ? (
@@ -230,7 +230,7 @@ export function ProfileView({
               className="w-full h-full object-cover"
             />
           ) : (
-            <div className="w-full h-full bg-gradient-to-r from-[#002EC1] to-[#0B1A4A]" />
+            <div className="w-full h-full bg-[#002EC1]" />
           )}
         </div>
 
@@ -238,7 +238,7 @@ export function ProfileView({
         <div className="px-5 sm:px-6 pb-6">
           {/* Avatar and Action button row */}
           <div className="relative z-10 flex items-end justify-between -mt-12 sm:-mt-14 mb-4">
-            <div className="w-24 h-24 sm:w-28 sm:h-28 bg-[#002EC1] border-4 border-[#1C1E1E] flex items-center justify-center text-3xl font-bold text-[#E6E6E6] rounded-full select-none overflow-hidden shrink-0 shadow-md">
+            <div className="w-24 h-24 sm:w-28 sm:h-28 bg-[#002EC1] border-4 border-[#232525] flex items-center justify-center text-3xl font-bold text-[#E6E6E6] select-none overflow-hidden shrink-0">
               {profile.avatar_url ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img
@@ -269,13 +269,13 @@ export function ProfileView({
                       setConfirmRestrictUser(false);
                     }}
                     aria-label="Admin user actions"
-                    className="p-2 text-[#A8A8A8] hover:text-[#E6E6E6] bg-[#242626] hover:bg-[#2E3030] border border-[#303232] transition-colors cursor-pointer"
+                    className="p-2 text-[#A8A8A8] hover:text-[#E6E6E6] bg-[#2E3030] hover:bg-[#353838] border border-[#303232] transition-colors cursor-pointer"
                   >
                     <MoreHorizontal size={16} strokeWidth={1.5} />
                   </button>
 
                   {adminMenuOpen && (
-                    <div className="absolute right-0 top-full mt-1 w-36 bg-[#232525] border border-[#303232] shadow-2xl py-1 z-50 animate-in fade-in zoom-in-95 duration-100">
+                    <div className="absolute right-0 top-full mt-1 w-36 bg-[#232525] border border-[#303232] py-1 z-50">
                       {isRestricted ? (
                         <button
                           type="button"
@@ -317,7 +317,7 @@ export function ProfileView({
             </h1>
             <p className="text-xs text-[#878787] font-mono">@{profile.username}</p>
             {profile.headline && (
-              <p className="text-sm text-[#E6E6E6] leading-relaxed pt-1.5 font-sans">
+              <p className="text-sm text-[#E6E6E6] leading-relaxed pt-1.5 max-w-prose">
                 {profile.headline}
               </p>
             )}
@@ -325,7 +325,7 @@ export function ProfileView({
 
           {/* Plain Text Bio */}
           {profile.bio && (
-            <p className="text-sm text-[#E6E6E6] leading-relaxed whitespace-pre-line pt-2 font-sans">
+            <p className="text-sm text-[#E6E6E6] leading-relaxed whitespace-pre-line pt-2 max-w-prose">
               {profile.bio}
             </p>
           )}
@@ -348,21 +348,21 @@ export function ProfileView({
             </div>
           )}
 
-          {/* Instagram-style Stat Row: posts, followers, following */}
-          <div className="flex items-center space-x-8 pt-4 border-t border-[#2B2D2D] mt-4 font-mono">
+          {/* Stat Row: posts, followers, following */}
+          <div className="flex items-center space-x-8 pt-4 border-t border-[#303232] mt-4 font-mono">
             <div>
               <div className="font-semibold text-sm text-[#E6E6E6]">{postCount}</div>
-              <div className="text-[11px] text-[#A8A8A8] font-sans">posts</div>
+              <div className="text-[11px] text-[#A8A8A8]">posts</div>
             </div>
             <div>
               <div className="font-semibold text-sm text-[#E6E6E6]">{followerCount}</div>
-              <div className="text-[11px] text-[#A8A8A8] font-sans">followers</div>
+              <div className="text-[11px] text-[#A8A8A8]">followers</div>
             </div>
             <div>
               <div className="font-semibold text-sm text-[#E6E6E6]">
                 {profile.following_count ?? 0}
               </div>
-              <div className="text-[11px] text-[#A8A8A8] font-sans">following</div>
+              <div className="text-[11px] text-[#A8A8A8]">following</div>
             </div>
           </div>
         </div>
@@ -374,13 +374,13 @@ export function ProfileView({
           Account restricted
         </div>
       ) : (
-        <>
+        <div className="space-y-4">
           {/* Tabs: Posts and About */}
-          <div className="flex border-b border-[#303232] pt-2">
+          <div className="flex border-b border-[#303232]">
             <button
               type="button"
               onClick={() => setActiveTab("posts")}
-              className={`pb-3 px-4 text-xs font-semibold uppercase tracking-wider transition-colors border-b-2 cursor-pointer ${
+              className={`pb-3 px-6 text-xs font-semibold uppercase tracking-wider transition-colors border-b-2 cursor-pointer ${
                 activeTab === "posts"
                   ? "border-[#E6E6E6] text-[#E6E6E6]"
                   : "border-transparent text-[#878787] hover:text-[#A8A8A8]"
@@ -391,7 +391,7 @@ export function ProfileView({
             <button
               type="button"
               onClick={() => setActiveTab("about")}
-              className={`pb-3 px-4 text-xs font-semibold uppercase tracking-wider transition-colors border-b-2 cursor-pointer ${
+              className={`pb-3 px-6 text-xs font-semibold uppercase tracking-wider transition-colors border-b-2 cursor-pointer ${
                 activeTab === "about"
                   ? "border-[#E6E6E6] text-[#E6E6E6]"
                   : "border-transparent text-[#878787] hover:text-[#A8A8A8]"
@@ -403,9 +403,9 @@ export function ProfileView({
 
           {/* Tab Content */}
           {activeTab === "posts" ? (
-            <div className="pt-1">
+            <div>
               {totalPostsCount === 0 ? (
-                <div className="py-16 text-center space-y-3">
+                <div className="py-16 text-center space-y-3 bg-[#232525] border border-[#303232]">
                   <p className="text-sm text-[#878787]">No posts.</p>
                   {currentUserId === profile.id && (
                     <Link
@@ -434,33 +434,35 @@ export function ProfileView({
               )}
             </div>
           ) : (
-            <div className="pt-2 space-y-6">
+            <div>
               {experience.length === 0 && (!profile.skills || profile.skills.length === 0) ? (
-                <p className="text-xs text-[#878787] py-8 text-center">Nothing yet.</p>
+                <div className="py-16 text-center bg-[#232525] border border-[#303232]">
+                  <p className="text-xs text-[#878787]">Nothing yet.</p>
+                </div>
               ) : (
-                <>
+                <div className="bg-[#232525] border border-[#303232] p-5 sm:p-6 space-y-6">
                   {experience.length > 0 && (
-                    <div className="space-y-3">
+                    <div className="space-y-4">
                       <h2 className="text-xs uppercase tracking-wider font-semibold text-[#878787] font-mono">
                         Experience
                       </h2>
-                      <div className="space-y-3 divide-y divide-[#2B2D2D]">
+                      <div className="space-y-4 divide-y divide-[#303232]">
                         {experience.map((exp) => (
-                          <div key={exp.id} className="pt-3 first:pt-0 space-y-1">
-                            <div className="flex items-start justify-between">
-                              <div>
-                                <h3 className="text-sm font-semibold text-[#E6E6E6]">
+                          <div key={exp.id} className="pt-4 first:pt-0 space-y-1.5">
+                            <div className="flex items-start justify-between gap-4">
+                              <div className="min-w-0">
+                                <h3 className="text-sm font-semibold text-[#E6E6E6] truncate">
                                   {exp.title}
                                 </h3>
                                 <p className="text-xs text-[#A8A8A8]">{exp.org_or_project}</p>
                               </div>
-                              <span className="text-[11px] text-[#878787] font-mono">
+                              <span className="text-[11px] text-[#878787] font-mono shrink-0">
                                 {exp.start_year} — {exp.end_year ?? "Present"}
                               </span>
                             </div>
 
                             {exp.description && (
-                              <p className="text-xs text-[#A8A8A8] leading-relaxed pt-1 font-sans">
+                              <p className="text-xs text-[#A8A8A8] leading-relaxed pt-1 max-w-prose">
                                 {exp.description}
                               </p>
                             )}
@@ -483,7 +485,7 @@ export function ProfileView({
                   )}
 
                   {profile.skills && profile.skills.length > 0 && (
-                    <div className="space-y-3">
+                    <div className="space-y-3 pt-2 first:pt-0">
                       <h2 className="text-xs uppercase tracking-wider font-semibold text-[#878787] font-mono">
                         Skills
                       </h2>
@@ -491,7 +493,7 @@ export function ProfileView({
                         {profile.skills.map((skill, i) => (
                           <span
                             key={i}
-                            className="px-3 py-1 text-xs bg-[#242626] border border-[#303232] text-[#E6E6E6]"
+                            className="px-3 py-1 text-xs bg-[#2E3030] border border-[#303232] text-[#E6E6E6]"
                           >
                             {skill}
                           </span>
@@ -499,11 +501,11 @@ export function ProfileView({
                       </div>
                     </div>
                   )}
-                </>
+                </div>
               )}
             </div>
           )}
-        </>
+        </div>
       )}
     </div>
   );

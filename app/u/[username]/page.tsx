@@ -131,7 +131,7 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
   return (
     <AppLayout
       title={profile.display_name || profile.username}
-      maxWidth="max-w-[760px]"
+      maxWidth="max-w-[680px]"
     >
       <ProfileView
         profile={profile as Profile}
