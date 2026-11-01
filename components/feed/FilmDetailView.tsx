@@ -3,7 +3,7 @@
 import React, { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Heart, ArrowLeft, Share2, Check, MessageSquare, Trash2, Send, Loader2 } from "lucide-react";
+import { Heart, ArrowLeft, Share2, Check, MessageSquare, Trash2, Send, Loader2, Maximize2, ChevronLeft, ChevronRight, X } from "lucide-react";
 import { FilmWithCreator, Comment } from "@/lib/types";
 import {
   toggleFilmLike,
@@ -15,6 +15,7 @@ import {
 import { FollowButton } from "@/components/profile/FollowButton";
 import { createClient } from "@/lib/supabase/client";
 import { PostMenu } from "./PostMenu";
+import { CATEGORIES } from "@/lib/constants";
 
 interface FilmDetailViewProps {
   film: FilmWithCreator;
@@ -57,6 +58,39 @@ export function FilmDetailView({
   const [likeCount, setLikeCount] = useState<number>(film.like_count || 0);
   const [isLiking, setIsLiking] = useState<boolean>(false);
   const [copied, setCopied] = useState<boolean>(false);
+
+  // Editable post state
+  const [title, setTitle] = useState(film.title);
+  const [caption, setCaption] = useState(film.caption);
+  const [body, setBody] = useState(film.body);
+  const [categorySlug, setCategorySlug] = useState(film.category_slug);
+
+  // Lightbox state
+  const [activeLightboxIndex, setActiveLightboxIndex] = useState(0);
+  const [showLightbox, setShowLightbox] = useState(false);
+
+  const images = (film.media_urls && film.media_urls.length > 0
+    ? film.media_urls
+    : [film.thumbnail_url]
+  ).filter(Boolean) as string[];
+
+  // Lightbox keyboard navigation
+  useEffect(() => {
+    if (!showLightbox) return;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setShowLightbox(false);
+      } else if (e.key === "ArrowLeft") {
+        setActiveLightboxIndex((prev) => (prev > 0 ? prev - 1 : images.length - 1));
+      } else if (e.key === "ArrowRight") {
+        setActiveLightboxIndex((prev) => (prev < images.length - 1 ? prev + 1 : 0));
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [showLightbox, images.length]);
 
   // Comments state
   const [comments, setComments] = useState<Comment[]>([]);
@@ -234,8 +268,8 @@ export function FilmDetailView({
   };
 
   const creator = film.profiles;
-  const channelSlug = film.category_slug;
-  const channelName = film.categories?.name || channelSlug;
+  const currentCategory = CATEGORIES.find((c) => c.slug === categorySlug);
+  const channelName = currentCategory?.name || film.categories?.name || categorySlug;
 
   return (
     <div className="space-y-4 max-w-[760px] mx-auto pb-16">
@@ -252,7 +286,7 @@ export function FilmDetailView({
 
         <div className="flex items-center space-x-2">
           <Link
-            href={`/c/${channelSlug}`}
+            href={`/c/${categorySlug}`}
             className="text-xs text-[#6C86FF] hover:underline uppercase tracking-wider"
           >
             c/{channelName}
@@ -261,6 +295,20 @@ export function FilmDetailView({
             filmId={film.id}
             ownerId={film.owner_id}
             currentUserId={currentUserId}
+            postType={postType}
+            initialTitle={title}
+            initialCaption={caption}
+            initialBody={body}
+            initialCategorySlug={categorySlug}
+            onUpdate={(updated) => {
+              setTitle(updated.title);
+              setCaption(updated.caption);
+              setBody(updated.body);
+              setCategorySlug(updated.category_slug);
+            }}
+            onDelete={() => {
+              router.push("/");
+            }}
           />
         </div>
       </div>
@@ -269,39 +317,41 @@ export function FilmDetailView({
       {postType === "writing" ? (
         <div className="bg-[#1C1E1E] border border-[#303232] rounded-2xl p-6 sm:p-8 space-y-4 shadow-xl">
           <h1 className="font-heading text-2xl sm:text-3xl text-[#E6E6E6] leading-snug">
-            {film.title}
+            {title}
           </h1>
           <div className="text-base sm:text-lg text-[#E6E6E6] font-sans leading-relaxed whitespace-pre-wrap select-text">
-            {film.body}
+            {body}
           </div>
         </div>
       ) : postType === "image" ? (
         <div className="space-y-3">
-          {(film.media_urls && film.media_urls.length > 0
-            ? film.media_urls
-            : [film.thumbnail_url]
-          )
-            .filter(Boolean)
-            .map((url, idx) => (
-              <div
-                key={idx}
-                className="bg-[#000000] border border-[#303232] rounded-2xl overflow-hidden shadow-xl"
-              >
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={url!}
-                  alt={`${film.title} - ${idx + 1}`}
-                  className="w-full h-auto max-h-[85vh] object-contain mx-auto"
-                />
+          {images.map((url, idx) => (
+            <div
+              key={idx}
+              className="bg-[#000000] border border-[#303232] rounded-2xl overflow-hidden shadow-xl group cursor-pointer relative"
+              onClick={() => {
+                setActiveLightboxIndex(idx);
+                setShowLightbox(true);
+              }}
+            >
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={url}
+                alt={`${title} - ${idx + 1}`}
+                className="w-full h-auto max-h-[85vh] object-contain mx-auto group-hover:opacity-95 transition-opacity"
+              />
+              <div className="absolute top-3 right-3 p-1.5 bg-black/60 text-[#E6E6E6] border border-[#303232] opacity-0 group-hover:opacity-100 transition-opacity">
+                <Maximize2 size={16} strokeWidth={1.5} />
               </div>
-            ))}
+            </div>
+          ))}
         </div>
       ) : (
         /* Video Player */
         <div className="relative aspect-video w-full bg-[#000000] border border-[#303232] rounded-2xl overflow-hidden shadow-2xl">
           <iframe
             src={`https://www.youtube-nocookie.com/embed/${film.youtube_id}?autoplay=1&rel=0&modestbranding=1`}
-            title={film.title}
+            title={title}
             className="w-full h-full border-0"
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
             allowFullScreen
@@ -390,9 +440,9 @@ export function FilmDetailView({
       </div>
 
       {/* Caption: Plain text, nothing around it */}
-      {film.caption && (
+      {caption && (
         <p className="text-sm text-[#E6E6E6] leading-relaxed whitespace-pre-wrap pt-1">
-          {film.caption}
+          {caption}
         </p>
       )}
 
@@ -559,6 +609,80 @@ export function FilmDetailView({
           </div>
         )}
       </section>
+
+      {/* Full-Screen Image Lightbox Modal */}
+      {showLightbox && images.length > 0 && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          className="fixed inset-0 z-50 bg-black/95 flex flex-col justify-between p-4"
+          onClick={() => setShowLightbox(false)}
+        >
+          <div
+            className="flex items-center justify-between z-10 w-full max-w-6xl mx-auto pb-2 border-b border-[#303232]"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="min-w-0 pr-4">
+              <h4 className="text-sm font-semibold text-[#E6E6E6] truncate">{title}</h4>
+              <p className="text-xs text-[#878787] font-mono">
+                Image {activeLightboxIndex + 1} of {images.length}
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => setShowLightbox(false)}
+              className="p-1.5 text-[#A8A8A8] hover:text-[#E6E6E6] bg-[#232525] hover:bg-[#2E3030] border border-[#303232] transition-colors cursor-pointer"
+              aria-label="Close image viewer"
+            >
+              <X size={20} strokeWidth={1.5} />
+            </button>
+          </div>
+
+          <div
+            className="flex-1 flex items-center justify-center relative w-full max-w-6xl mx-auto my-auto p-2"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={images[activeLightboxIndex]}
+              alt={`${title} - full image ${activeLightboxIndex + 1}`}
+              className="max-h-[82vh] max-w-[92vw] w-auto h-auto object-contain select-none"
+            />
+
+            {images.length > 1 && (
+              <>
+                <button
+                  type="button"
+                  onClick={() =>
+                    setActiveLightboxIndex((prev) => (prev > 0 ? prev - 1 : images.length - 1))
+                  }
+                  className="absolute left-2 top-1/2 -translate-y-1/2 p-3 bg-[#232525]/90 hover:bg-[#2E3030] border border-[#303232] text-[#E6E6E6] transition-colors cursor-pointer"
+                  aria-label="Previous image"
+                >
+                  <ChevronLeft size={20} strokeWidth={2} />
+                </button>
+                <button
+                  type="button"
+                  onClick={() =>
+                    setActiveLightboxIndex((prev) => (prev < images.length - 1 ? prev + 1 : 0))
+                  }
+                  className="absolute right-2 top-1/2 -translate-y-1/2 p-3 bg-[#232525]/90 hover:bg-[#2E3030] border border-[#303232] text-[#E6E6E6] transition-colors cursor-pointer"
+                  aria-label="Next image"
+                >
+                  <ChevronRight size={20} strokeWidth={2} />
+                </button>
+              </>
+            )}
+          </div>
+
+          <div
+            className="w-full max-w-6xl mx-auto pt-2 flex items-center justify-between text-xs text-[#878787] font-mono border-t border-[#303232]"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <span>Click backdrop or press Esc to close</span>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

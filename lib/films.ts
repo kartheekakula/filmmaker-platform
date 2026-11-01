@@ -447,6 +447,70 @@ export async function createFilm(
   return data as Film;
 }
 
+export interface UpdateFilmInput {
+  title: string;
+  caption?: string | null;
+  body?: string | null;
+  category_slug: string;
+}
+
+/**
+ * Update an existing film or post (title, caption, body, channel)
+ */
+export async function updateFilm(
+  supabase: SupabaseClient,
+  filmId: string,
+  userId: string,
+  input: UpdateFilmInput
+): Promise<Film> {
+  if (!input.title || !input.title.trim()) {
+    throw new Error("Title is required.");
+  }
+  if (!input.category_slug) {
+    throw new Error("A channel category is required.");
+  }
+
+  const { data, error } = await supabase
+    .from("films")
+    .update({
+      title: input.title.trim(),
+      caption: input.caption?.trim() || null,
+      body: input.body?.trim() || null,
+      category_slug: input.category_slug,
+    })
+    .eq("id", filmId)
+    .eq("owner_id", userId)
+    .select()
+    .single();
+
+  if (error) {
+    console.error("Error updating post:", error);
+    throw error;
+  }
+
+  return data as Film;
+}
+
+/**
+ * Delete a film or post
+ */
+export async function deleteFilm(
+  supabase: SupabaseClient,
+  filmId: string,
+  userId: string
+): Promise<void> {
+  const { error } = await supabase
+    .from("films")
+    .delete()
+    .eq("id", filmId)
+    .eq("owner_id", userId);
+
+  if (error) {
+    console.error("Error deleting post:", error);
+    throw error;
+  }
+}
+
 /**
  * Fetch films belonging to a specific user (for Activity or Featured Picker)
  */

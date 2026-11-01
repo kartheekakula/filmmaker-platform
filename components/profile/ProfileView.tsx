@@ -4,7 +4,7 @@ import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import type { Profile, ProfileExperience, Film, ProfileTileFilm } from "@/lib/types";
 import { FollowButton } from "./FollowButton";
-import { MapPin, Globe, ExternalLink, Pin, Play, Layers, FileText, MoreHorizontal, RotateCcw, Ban } from "lucide-react";
+import { MapPin, Globe, ExternalLink, Pin, Play, Layers, FileText, MoreHorizontal, RotateCcw, Ban, X } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { FeedCursor, getUserPosts } from "@/lib/films";
 
@@ -38,11 +38,22 @@ export function ProfileView({
   const [supabase] = useState(() => createClient());
   const [followerCount, setFollowerCount] = useState(profile.follower_count ?? 0);
   const [activeTab, setActiveTab] = useState<"posts" | "about">("posts");
+  const [showAvatarModal, setShowAvatarModal] = useState(false);
 
   const [isRestricted, setIsRestricted] = useState(isProfileRestricted);
   const [adminMenuOpen, setAdminMenuOpen] = useState(false);
   const [confirmRestrictUser, setConfirmRestrictUser] = useState(false);
   const adminMenuRef = useRef<HTMLDivElement>(null);
+
+  // Close avatar modal on Escape key
+  useEffect(() => {
+    if (!showAvatarModal) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setShowAvatarModal(false);
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [showAvatarModal]);
 
   // Sync isProfileRestricted prop
   useEffect(() => {
@@ -238,7 +249,14 @@ export function ProfileView({
         <div className="px-5 sm:px-6 pb-6">
           {/* Avatar and Action button row */}
           <div className="relative z-10 flex items-end justify-between -mt-12 sm:-mt-14 mb-4">
-            <div className="w-24 h-24 sm:w-28 sm:h-28 bg-[#002EC1] border-4 border-[#1C1E1E] flex items-center justify-center text-3xl font-bold text-[#E6E6E6] rounded-full select-none overflow-hidden shrink-0 shadow-md">
+            <div
+              role="button"
+              tabIndex={0}
+              onClick={() => setShowAvatarModal(true)}
+              aria-label="View profile picture"
+              title="View profile picture"
+              className="w-24 h-24 sm:w-28 sm:h-28 bg-[#002EC1] border-4 border-[#1C1E1E] flex items-center justify-center text-3xl font-bold text-[#E6E6E6] rounded-full select-none overflow-hidden shrink-0 shadow-md cursor-pointer hover:opacity-90 transition-opacity"
+            >
               {profile.avatar_url ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img
@@ -376,11 +394,11 @@ export function ProfileView({
       ) : (
         <>
           {/* Tabs: Posts and About */}
-          <div className="flex border-b border-[#303232] pt-2">
+          <div className="flex justify-center border-b border-[#303232] pt-2">
             <button
               type="button"
               onClick={() => setActiveTab("posts")}
-              className={`pb-3 px-4 text-xs font-semibold uppercase tracking-wider transition-colors border-b-2 cursor-pointer ${
+              className={`pb-3 px-6 text-xs font-semibold uppercase tracking-wider transition-colors border-b-2 cursor-pointer ${
                 activeTab === "posts"
                   ? "border-[#E6E6E6] text-[#E6E6E6]"
                   : "border-transparent text-[#878787] hover:text-[#A8A8A8]"
@@ -391,7 +409,7 @@ export function ProfileView({
             <button
               type="button"
               onClick={() => setActiveTab("about")}
-              className={`pb-3 px-4 text-xs font-semibold uppercase tracking-wider transition-colors border-b-2 cursor-pointer ${
+              className={`pb-3 px-6 text-xs font-semibold uppercase tracking-wider transition-colors border-b-2 cursor-pointer ${
                 activeTab === "about"
                   ? "border-[#E6E6E6] text-[#E6E6E6]"
                   : "border-transparent text-[#878787] hover:text-[#A8A8A8]"
@@ -504,6 +522,52 @@ export function ProfileView({
             </div>
           )}
         </>
+      )}
+
+      {/* Instagram-style Profile Picture Modal */}
+      {showAvatarModal && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-4 animate-in fade-in duration-150"
+          onClick={() => setShowAvatarModal(false)}
+        >
+          <div
+            className="w-full max-w-sm bg-[#232525] border border-[#303232] shadow-2xl p-6 flex flex-col items-center space-y-4 relative"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              type="button"
+              onClick={() => setShowAvatarModal(false)}
+              className="absolute top-3 right-3 p-1.5 text-[#A8A8A8] hover:text-[#E6E6E6] bg-[#1C1E1E] hover:bg-[#2E3030] border border-[#303232] transition-colors cursor-pointer"
+              aria-label="Close"
+            >
+              <X size={16} strokeWidth={1.5} />
+            </button>
+
+            {/* Large Avatar */}
+            <div className="w-56 h-56 sm:w-64 sm:h-64 rounded-full overflow-hidden bg-[#002EC1] border-4 border-[#303232] flex items-center justify-center text-6xl font-bold text-[#E6E6E6] shadow-xl">
+              {profile.avatar_url ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={profile.avatar_url}
+                  alt={profile.display_name}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                (profile.display_name?.[0] || profile.username?.[0] || "A").toUpperCase()
+              )}
+            </div>
+
+            {/* Profile Info in Modal */}
+            <div className="text-center space-y-1">
+              <h3 className="font-heading text-lg text-[#E6E6E6]">
+                {profile.display_name || profile.username}
+              </h3>
+              <p className="text-xs text-[#878787] font-mono">@{profile.username}</p>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );
