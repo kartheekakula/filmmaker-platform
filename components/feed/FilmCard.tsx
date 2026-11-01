@@ -173,8 +173,8 @@ export function FilmCard({ film, currentUserId }: FilmCardProps) {
         className="w-full bg-[#232525] border border-[#303232] rounded-2xl overflow-hidden transition-all duration-200 hover:border-[#6C86FF]/40 shadow-lg"
       >
         {/* 1. Creator Header Row */}
-        <div className="p-4 flex items-center justify-between">
-          <div className="flex items-center space-x-3 min-w-0">
+        <div className="p-4 flex items-center justify-between gap-3">
+          <div className="flex items-center space-x-3 min-w-0 flex-1">
             {/* Rounded Creator Avatar */}
             <Link
               href={`/u/${creator.username}`}
@@ -192,30 +192,29 @@ export function FilmCard({ film, currentUserId }: FilmCardProps) {
               )}
             </Link>
 
-            {/* Creator Info */}
-            <div className="min-w-0 flex flex-col justify-center">
+            {/* Creator Info & Channel */}
+            <div className="min-w-0 flex-1 flex flex-col justify-center">
               <Link
                 href={`/u/${creator.username}`}
                 className="text-sm font-semibold text-[#E6E6E6] hover:text-[#6C86FF] transition-colors truncate block"
               >
                 {creator.display_name || creator.username}
               </Link>
-              <div className="flex items-center space-x-1.5 text-xs font-mono text-[#878787]">
-                <span>@{creator.username}</span>
+              <div className="flex items-center space-x-1.5 text-xs font-mono text-[#878787] truncate">
+                <Link
+                  href={`/c/${categorySlug}`}
+                  className="text-[#6C86FF] hover:underline uppercase tracking-tight shrink-0 font-medium"
+                >
+                  c/{channelName}
+                </Link>
                 <span>•</span>
-                <span>{formatRelativeTime(film.created_at)}</span>
+                <span className="shrink-0">{formatRelativeTime(film.created_at)}</span>
               </div>
             </div>
           </div>
 
-          {/* Channel Pill Badge & Post Menu */}
-          <div className="flex items-center space-x-1.5 shrink-0">
-            <Link
-              href={`/c/${categorySlug}`}
-              className="px-2.5 py-1 bg-[#252727] hover:bg-[#2F3131] border border-[#303232] text-[#6C86FF] text-[11px] font-mono uppercase tracking-tight transition-colors rounded-full"
-            >
-              c/{channelName}
-            </Link>
+          {/* Post Menu */}
+          <div className="shrink-0 flex items-center">
             <PostMenu
               filmId={film.id}
               ownerId={film.owner_id}
@@ -236,14 +235,18 @@ export function FilmCard({ film, currentUserId }: FilmCardProps) {
           </div>
         </div>
 
-        {/* 2. Media Area by Post Type */}
+        {/* 2. Post Title (Above the Post Media) */}
+        <div className="px-4 pt-0.5 pb-3">
+          <Link href={`/f/${film.id}`} className="group block">
+            <h2 className="font-heading text-xl sm:text-2xl text-[#E6E6E6] group-hover:text-[#6C86FF] transition-colors leading-snug">
+              {title}
+            </h2>
+          </Link>
+        </div>
+
+        {/* 3. Media Area by Post Type */}
         {postType === "writing" ? (
-          <div className="p-5 sm:p-6 bg-[#1A1C1C] border-b border-[#2B2D2D] space-y-3">
-            <Link href={`/f/${film.id}`}>
-              <h2 className="font-heading text-xl sm:text-2xl text-[#E6E6E6] hover:text-[#6C86FF] transition-colors leading-snug">
-                {title}
-              </h2>
-            </Link>
+          <div className="px-5 py-4 bg-[#1A1C1C] border-y border-[#2B2D2D] space-y-3">
             <p className="text-sm text-[#A8A8A8] font-sans leading-relaxed line-clamp-6 whitespace-pre-wrap">
               {body || caption || ""}
             </p>
@@ -321,8 +324,17 @@ export function FilmCard({ film, currentUserId }: FilmCardProps) {
           </div>
         )}
 
-        {/* 3. Action Bar: Like, Comment, Share */}
-        <div className="px-4 pt-3.5 pb-2 flex items-center justify-between">
+        {/* 4. Caption (for media posts with caption) */}
+        {postType !== "writing" && caption && (
+          <div className="px-4 pt-3 pb-1">
+            <p className="text-sm text-[#A8A8A8] font-sans leading-relaxed line-clamp-3">
+              {caption}
+            </p>
+          </div>
+        )}
+
+        {/* 5. Action Bar: Like, Comment, Share */}
+        <div className="px-4 pt-3 pb-3 flex items-center justify-between">
           <div className="flex items-center space-x-5">
             {/* Heart / Like Button */}
             <button
@@ -376,23 +388,6 @@ export function FilmCard({ film, currentUserId }: FilmCardProps) {
             <span>{film.view_count || 0} views</span>
           </div>
         </div>
-
-        {/* 4. Editorial Title & Caption (for video and image types) */}
-        {postType !== "writing" && (
-          <div className="px-4 pb-3 space-y-1.5">
-            <Link href={`/f/${film.id}`}>
-              <h2 className="font-heading text-xl sm:text-2xl text-[#E6E6E6] hover:text-[#6C86FF] transition-colors leading-snug">
-                {title}
-              </h2>
-            </Link>
-
-            {caption && (
-              <p className="text-sm text-[#A8A8A8] font-sans leading-relaxed line-clamp-3">
-                {caption}
-              </p>
-            )}
-          </div>
-        )}
       </article>
     </>
   );

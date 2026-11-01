@@ -287,7 +287,7 @@ export function FilmDetailView({
         <div className="flex items-center space-x-2">
           <Link
             href={`/c/${categorySlug}`}
-            className="text-xs text-[#6C86FF] hover:underline uppercase tracking-wider"
+            className="text-xs text-[#6C86FF] hover:underline uppercase tracking-wider font-mono font-medium"
           >
             c/{channelName}
           </Link>
@@ -313,14 +313,59 @@ export function FilmDetailView({
         </div>
       </div>
 
-      {/* Main Content Area in place of player */}
+      {/* Creator Row (Avatar, Display Name, Date, Follow Button) */}
+      <div className="flex items-center justify-between pt-1">
+        <Link
+          href={`/u/${creator?.username || ""}`}
+          className="flex items-center space-x-3 group min-w-0"
+        >
+          <div className="w-10 h-10 bg-[#002EC1] rounded-full shrink-0 flex items-center justify-center text-[#E6E6E6] font-bold text-sm overflow-hidden ring-2 ring-[#2B2D2D]">
+            {creator?.avatar_url ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={creator.avatar_url}
+                alt={creator.display_name}
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <span>{(creator?.display_name || creator?.username || "?").charAt(0).toUpperCase()}</span>
+            )}
+          </div>
+
+          <div className="min-w-0">
+            <p className="text-sm font-semibold text-[#E6E6E6] group-hover:text-[#6C86FF] transition-colors truncate">
+              {creator?.display_name || creator?.username}
+            </p>
+            <p className="text-xs font-mono text-[#878787]">
+              @{creator?.username} • {formatCommentTime(film.created_at)}
+            </p>
+          </div>
+        </Link>
+
+        {creator && (
+          <div>
+            <FollowButton
+              targetUserId={creator.id}
+              initialIsFollowing={initialIsFollowing}
+              currentUserId={currentUserId}
+              username={creator.username}
+            />
+          </div>
+        )}
+      </div>
+
+      {/* Post Title (Always Above the Post Media) */}
+      <div className="pt-1">
+        <h1 className="font-heading text-2xl sm:text-3xl text-[#E6E6E6] leading-snug">
+          {title}
+        </h1>
+      </div>
+
+      {/* Main Content Area */}
       {postType === "writing" ? (
         <div className="bg-[#1C1E1E] border border-[#303232] rounded-2xl p-6 sm:p-8 space-y-4 shadow-xl">
-          <h1 className="font-heading text-2xl sm:text-3xl text-[#E6E6E6] leading-snug">
-            {title}
-          </h1>
           <div className="text-base sm:text-lg text-[#E6E6E6] font-sans leading-relaxed whitespace-pre-wrap select-text">
-            {body}
+            {body || caption}
           </div>
         </div>
       ) : postType === "image" ? (
@@ -340,7 +385,7 @@ export function FilmDetailView({
                 alt={`${title} - ${idx + 1}`}
                 className="w-full h-auto max-h-[85vh] object-contain mx-auto group-hover:opacity-95 transition-opacity"
               />
-              <div className="absolute top-3 right-3 p-1.5 bg-black/60 text-[#E6E6E6] border border-[#303232] opacity-0 group-hover:opacity-100 transition-opacity">
+              <div className="absolute top-3 right-3 p-1.5 bg-black/60 text-[#E6E6E6] border border-[#303232] opacity-0 group-hover:opacity-100 transition-opacity rounded-lg">
                 <Maximize2 size={16} strokeWidth={1.5} />
               </div>
             </div>
@@ -357,6 +402,13 @@ export function FilmDetailView({
             allowFullScreen
           />
         </div>
+      )}
+
+      {/* Caption (for image and video posts) */}
+      {postType !== "writing" && caption && (
+        <p className="text-sm sm:text-base text-[#E6E6E6] font-sans leading-relaxed whitespace-pre-wrap pt-1">
+          {caption}
+        </p>
       )}
 
       {/* Action Row: Like, Comment, Share (Icon-only, stroke 1.5, size 20, small counts) */}
@@ -402,49 +454,6 @@ export function FilmDetailView({
           )}
         </button>
       </div>
-
-      {/* Poster Row: Avatar, display name, FollowButton */}
-      <div className="flex items-center justify-between pt-1">
-        <Link
-          href={`/u/${creator.username}`}
-          className="flex items-center space-x-3 group min-w-0"
-        >
-          <div className="w-10 h-10 bg-[#002EC1] rounded-full shrink-0 flex items-center justify-center text-[#E6E6E6] font-bold text-sm overflow-hidden">
-            {creator.avatar_url ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={creator.avatar_url}
-                alt={creator.display_name}
-                className="w-full h-full object-cover"
-              />
-            ) : (
-              <span>{(creator.display_name || creator.username || "?").charAt(0).toUpperCase()}</span>
-            )}
-          </div>
-
-          <div className="min-w-0 truncate">
-            <p className="text-sm font-semibold text-[#E6E6E6] group-hover:text-[#6C86FF] transition-colors truncate">
-              {creator.display_name || creator.username}
-            </p>
-          </div>
-        </Link>
-
-        <div>
-          <FollowButton
-            targetUserId={creator.id}
-            initialIsFollowing={initialIsFollowing}
-            currentUserId={currentUserId}
-            username={creator.username}
-          />
-        </div>
-      </div>
-
-      {/* Caption: Plain text, nothing around it */}
-      {caption && (
-        <p className="text-sm text-[#E6E6E6] leading-relaxed whitespace-pre-wrap pt-1">
-          {caption}
-        </p>
-      )}
 
       {/* Comments Section */}
       <section id="comments-section" className="pt-6 border-t border-[#303232] space-y-4">
