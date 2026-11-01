@@ -9,10 +9,6 @@ import {
   Share2,
   Check,
   MessageSquare,
-  ChevronLeft,
-  ChevronRight,
-  X,
-  Maximize2,
 } from "lucide-react";
 import { FilmWithCreator } from "@/lib/types";
 import { toggleFilmLike } from "@/lib/films";
@@ -66,18 +62,9 @@ export function FilmCard({ film, currentUserId }: FilmCardProps) {
   const [isLiking, setIsLiking] = useState<boolean>(false);
   const [copied, setCopied] = useState<boolean>(false);
 
-  // Carousel & Image lightbox state
-  const [activeImageIndex, setActiveImageIndex] = useState(0);
-  const [showImageLightbox, setShowImageLightbox] = useState(false);
-
   const postType = film.post_type || "video";
   const isActive = postType === "video" && activeFilmId === film.id && previewsEnabled;
   const previewStart = 0;
-
-  const images = (film.media_urls && film.media_urls.length > 0
-    ? film.media_urls
-    : [film.thumbnail_url]
-  ).filter(Boolean) as string[];
 
   // Intersection Observer for 60% visibility & 400ms debounce
   useEffect(() => {
@@ -164,24 +151,6 @@ export function FilmCard({ film, currentUserId }: FilmCardProps) {
     }
   };
 
-  // Image lightbox keyboard navigation
-  useEffect(() => {
-    if (!showImageLightbox) return;
-
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
-        setShowImageLightbox(false);
-      } else if (e.key === "ArrowLeft") {
-        setActiveImageIndex((prev) => (prev > 0 ? prev - 1 : images.length - 1));
-      } else if (e.key === "ArrowRight") {
-        setActiveImageIndex((prev) => (prev < images.length - 1 ? prev + 1 : 0));
-      }
-    };
-
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [showImageLightbox, images.length]);
-
   if (isDeleted) {
     return null;
   }
@@ -201,15 +170,15 @@ export function FilmCard({ film, currentUserId }: FilmCardProps) {
       <article
         ref={cardRef}
         data-film-id={film.id}
-        className="w-full bg-[#232525] border border-[#303232] overflow-hidden"
+        className="w-full bg-[#232525] border border-[#303232] rounded-2xl overflow-hidden transition-all duration-200 hover:border-[#6C86FF]/40 shadow-lg"
       >
         {/* 1. Creator Header Row */}
         <div className="p-4 flex items-center justify-between">
           <div className="flex items-center space-x-3 min-w-0">
-            {/* Square Creator Avatar */}
+            {/* Rounded Creator Avatar */}
             <Link
               href={`/u/${creator.username}`}
-              className="w-10 h-10 bg-[#002EC1] shrink-0 flex items-center justify-center font-bold text-sm text-[#E6E6E6] overflow-hidden select-none"
+              className="w-10 h-10 bg-[#002EC1] rounded-full shrink-0 flex items-center justify-center font-bold text-sm text-[#E6E6E6] overflow-hidden select-none ring-2 ring-[#2B2D2D]"
             >
               {creator.avatar_url ? (
                 // eslint-disable-next-line @next/next/no-img-element
@@ -243,7 +212,7 @@ export function FilmCard({ film, currentUserId }: FilmCardProps) {
           <div className="flex items-center space-x-1.5 shrink-0">
             <Link
               href={`/c/${categorySlug}`}
-              className="px-2.5 py-1 bg-[#252727] hover:bg-[#2F3131] border border-[#303232] text-[#6C86FF] text-[11px] font-mono uppercase tracking-tight transition-colors"
+              className="px-2.5 py-1 bg-[#252727] hover:bg-[#2F3131] border border-[#303232] text-[#6C86FF] text-[11px] font-mono uppercase tracking-tight transition-colors rounded-full"
             >
               c/{channelName}
             </Link>
@@ -288,66 +257,25 @@ export function FilmCard({ film, currentUserId }: FilmCardProps) {
             </div>
           </div>
         ) : postType === "image" ? (
-          /* Reddit-style Full Image Display: uncropped, adaptive height up to 580px */
-          <div className="relative w-full bg-[#000000] overflow-hidden select-none flex items-center justify-center max-h-[580px] sm:max-h-[640px] group">
-            {images.length > 0 ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={images[activeImageIndex]}
-                alt={`${title} - ${activeImageIndex + 1}`}
-                className="w-full h-auto max-h-[580px] sm:max-h-[640px] object-contain cursor-pointer transition-opacity duration-150"
-                loading="lazy"
-                onClick={() => setShowImageLightbox(true)}
-              />
-            ) : (
-              <div className="w-full h-48 flex items-center justify-center text-xs text-[#878787]">
-                No image available
+          /* Reddit-style Image Feed Preview (Previous Version: 16:9 / 16:10, links directly to post) */
+          <div className="relative aspect-video sm:aspect-[16/10] w-full bg-[#000000] overflow-hidden select-none">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={film.media_urls?.[0] || film.thumbnail_url || ""}
+              alt={title}
+              className="w-full h-full object-cover"
+              loading="lazy"
+            />
+            {film.media_urls && film.media_urls.length > 1 && (
+              <div className="absolute top-3 right-3 px-2 py-0.5 bg-[#000000]/80 backdrop-blur border border-[#303232] text-[11px] font-mono text-[#E6E6E6] rounded-full z-10">
+                1/{film.media_urls.length}
               </div>
             )}
-
-            {/* Click to expand hint overlay */}
-            <button
-              type="button"
-              onClick={() => setShowImageLightbox(true)}
-              className="absolute top-3 left-3 p-1.5 bg-black/70 hover:bg-black text-[#E6E6E6] border border-[#303232] opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer z-10"
-              title="View full image"
-              aria-label="View full image"
-            >
-              <Maximize2 size={14} strokeWidth={1.5} />
-            </button>
-
-            {/* Multiple Images Navigation Controls */}
-            {images.length > 1 && (
-              <>
-                <button
-                  type="button"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setActiveImageIndex((prev) => (prev > 0 ? prev - 1 : images.length - 1));
-                  }}
-                  className="absolute left-2.5 top-1/2 -translate-y-1/2 p-2 bg-black/75 hover:bg-black text-[#E6E6E6] border border-[#303232] transition-colors z-20 cursor-pointer"
-                  aria-label="Previous image"
-                >
-                  <ChevronLeft size={16} strokeWidth={2} />
-                </button>
-
-                <button
-                  type="button"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setActiveImageIndex((prev) => (prev < images.length - 1 ? prev + 1 : 0));
-                  }}
-                  className="absolute right-2.5 top-1/2 -translate-y-1/2 p-2 bg-black/75 hover:bg-black text-[#E6E6E6] border border-[#303232] transition-colors z-20 cursor-pointer"
-                  aria-label="Next image"
-                >
-                  <ChevronRight size={16} strokeWidth={2} />
-                </button>
-
-                <div className="absolute top-3 right-3 px-2 py-0.5 bg-black/80 border border-[#303232] text-[11px] font-mono text-[#E6E6E6] z-10">
-                  {activeImageIndex + 1}/{images.length}
-                </div>
-              </>
-            )}
+            <Link
+              href={`/f/${film.id}`}
+              className="absolute inset-0 z-20"
+              aria-label={`View ${title}`}
+            />
           </div>
         ) : (
           /* Video Frame (16:9 Aspect Ratio) */
@@ -432,7 +360,7 @@ export function FilmCard({ film, currentUserId }: FilmCardProps) {
               aria-label="Share work"
             >
               {copied ? (
-                <span className="flex items-center space-x-1 text-xs font-mono text-[#6C86FF] bg-[#0B1A4A] px-2 py-0.5">
+                <span className="flex items-center space-x-1 text-xs font-mono text-[#6C86FF] bg-[#0B1A4A] px-2 py-0.5 rounded-full">
                   <Check className="w-3.5 h-3.5" />
                   <span>Copied!</span>
                 </span>
@@ -466,92 +394,6 @@ export function FilmCard({ film, currentUserId }: FilmCardProps) {
           </div>
         )}
       </article>
-
-      {/* Reddit-style Full Image Lightbox Modal */}
-      {showImageLightbox && images.length > 0 && (
-        <div
-          role="dialog"
-          aria-modal="true"
-          className="fixed inset-0 z-50 bg-black/95 flex flex-col justify-between p-4"
-          onClick={() => setShowImageLightbox(false)}
-        >
-          {/* Modal Top Bar */}
-          <div
-            className="flex items-center justify-between z-10 w-full max-w-6xl mx-auto pb-2 border-b border-[#303232]"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="min-w-0 pr-4">
-              <h4 className="text-sm font-semibold text-[#E6E6E6] truncate">{title}</h4>
-              <p className="text-xs text-[#878787] font-mono">
-                Image {activeImageIndex + 1} of {images.length}
-              </p>
-            </div>
-
-            <button
-              type="button"
-              onClick={() => setShowImageLightbox(false)}
-              className="p-1.5 text-[#A8A8A8] hover:text-[#E6E6E6] bg-[#232525] hover:bg-[#2E3030] border border-[#303232] transition-colors cursor-pointer"
-              aria-label="Close image viewer"
-            >
-              <X size={20} strokeWidth={1.5} />
-            </button>
-          </div>
-
-          {/* Modal Centered Image */}
-          <div
-            className="flex-1 flex items-center justify-center relative w-full max-w-6xl mx-auto my-auto p-2"
-            onClick={(e) => e.stopPropagation()}
-          >
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={images[activeImageIndex]}
-              alt={`${title} - full image ${activeImageIndex + 1}`}
-              className="max-h-[82vh] max-w-[92vw] w-auto h-auto object-contain select-none"
-            />
-
-            {/* Nav Arrows if multiple */}
-            {images.length > 1 && (
-              <>
-                <button
-                  type="button"
-                  onClick={() =>
-                    setActiveImageIndex((prev) => (prev > 0 ? prev - 1 : images.length - 1))
-                  }
-                  className="absolute left-2 top-1/2 -translate-y-1/2 p-3 bg-[#232525]/90 hover:bg-[#2E3030] border border-[#303232] text-[#E6E6E6] transition-colors cursor-pointer"
-                  aria-label="Previous"
-                >
-                  <ChevronLeft size={20} strokeWidth={2} />
-                </button>
-                <button
-                  type="button"
-                  onClick={() =>
-                    setActiveImageIndex((prev) => (prev < images.length - 1 ? prev + 1 : 0))
-                  }
-                  className="absolute right-2 top-1/2 -translate-y-1/2 p-3 bg-[#232525]/90 hover:bg-[#2E3030] border border-[#303232] text-[#E6E6E6] transition-colors cursor-pointer"
-                  aria-label="Next"
-                >
-                  <ChevronRight size={20} strokeWidth={2} />
-                </button>
-              </>
-            )}
-          </div>
-
-          {/* Modal Footer */}
-          <div
-            className="w-full max-w-6xl mx-auto pt-2 flex items-center justify-between text-xs text-[#878787] font-mono border-t border-[#303232]"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <span>Click backdrop or press Esc to close</span>
-            <Link
-              href={`/f/${film.id}`}
-              className="text-[#6C86FF] hover:underline"
-              onClick={() => setShowImageLightbox(false)}
-            >
-              Open post comments →
-            </Link>
-          </div>
-        </div>
-      )}
     </>
   );
 }

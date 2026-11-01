@@ -509,7 +509,7 @@ export function ProfileView({
                         {profile.skills.map((skill, i) => (
                           <span
                             key={i}
-                            className="px-3 py-1 text-xs bg-[#242626] border border-[#303232] text-[#E6E6E6]"
+                            className="px-3 py-1 text-xs bg-[#242626] border border-[#303232] text-[#E6E6E6] rounded-full"
                           >
                             {skill}
                           </span>
@@ -533,13 +533,13 @@ export function ProfileView({
           onClick={() => setShowAvatarModal(false)}
         >
           <div
-            className="w-full max-w-sm bg-[#232525] border border-[#303232] shadow-2xl p-6 flex flex-col items-center space-y-4 relative"
+            className="w-full max-w-sm bg-[#232525] border border-[#303232] rounded-2xl shadow-2xl p-6 flex flex-col items-center space-y-4 relative"
             onClick={(e) => e.stopPropagation()}
           >
             <button
               type="button"
               onClick={() => setShowAvatarModal(false)}
-              className="absolute top-3 right-3 p-1.5 text-[#A8A8A8] hover:text-[#E6E6E6] bg-[#1C1E1E] hover:bg-[#2E3030] border border-[#303232] transition-colors cursor-pointer"
+              className="absolute top-3 right-3 p-1.5 text-[#A8A8A8] hover:text-[#E6E6E6] bg-[#1C1E1E] hover:bg-[#2E3030] border border-[#303232] rounded-full transition-colors cursor-pointer"
               aria-label="Close"
             >
               <X size={16} strokeWidth={1.5} />

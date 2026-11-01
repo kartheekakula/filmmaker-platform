@@ -457,7 +457,7 @@ export function FilmDetailView({
         {/* Comment Input */}
         {currentUserId ? (
           isRestricted ? (
-            <div className="p-4 bg-[#1A1C1C] border border-[#303232] text-center text-xs text-[#878787]">
+            <div className="p-4 bg-[#1A1C1C] border border-[#303232] rounded-xl text-center text-xs text-[#878787]">
               Account restricted
             </div>
           ) : (
@@ -469,7 +469,7 @@ export function FilmDetailView({
                   maxLength={1000}
                   rows={3}
                   placeholder="Write a comment..."
-                  className="w-full px-3.5 py-2.5 bg-[#1A1C1C] border border-[#303232] text-[#E6E6E6] placeholder-[#878787] text-sm focus:outline-none focus:border-[#6C86FF] resize-none transition-colors"
+                  className="w-full px-3.5 py-2.5 bg-[#1A1C1C] border border-[#303232] rounded-xl text-[#E6E6E6] placeholder-[#878787] text-sm focus:outline-none focus:border-[#6C86FF] resize-none transition-colors"
                 />
                 <div className="flex items-center justify-between pt-1">
                   <span className="text-[10px] font-mono text-[#878787]">
@@ -478,7 +478,7 @@ export function FilmDetailView({
                   <button
                     type="submit"
                     disabled={!commentInput.trim() || submittingComment}
-                    className="px-4 py-1.5 bg-[#002EC1] hover:bg-[#1F4BE0] active:bg-[#0021A0] disabled:opacity-50 disabled:cursor-not-allowed text-[#E6E6E6] text-xs font-semibold flex items-center space-x-1.5 transition-colors cursor-pointer"
+                    className="px-4 py-1.5 bg-[#002EC1] hover:bg-[#1F4BE0] active:bg-[#0021A0] disabled:opacity-50 disabled:cursor-not-allowed text-[#E6E6E6] text-xs font-semibold rounded-xl flex items-center space-x-1.5 transition-colors cursor-pointer"
                   >
                     {submittingComment ? (
                       <Loader2 className="w-3.5 h-3.5 animate-spin" />
@@ -495,11 +495,11 @@ export function FilmDetailView({
             </form>
           )
         ) : (
-          <div className="p-4 bg-[#1A1C1C] border border-[#303232] flex items-center justify-between">
+          <div className="p-4 bg-[#1A1C1C] border border-[#303232] rounded-xl flex items-center justify-between">
             <p className="text-xs text-[#A8A8A8]">Sign in to comment.</p>
             <Link
               href={`/login?next=/f/${film.id}`}
-              className="px-3.5 py-1.5 bg-[#002EC1] hover:bg-[#1F4BE0] text-[#E6E6E6] text-xs font-semibold transition-colors"
+              className="px-3.5 py-1.5 bg-[#002EC1] hover:bg-[#1F4BE0] text-[#E6E6E6] text-xs font-semibold rounded-lg transition-colors"
             >
               Sign in
             </Link>

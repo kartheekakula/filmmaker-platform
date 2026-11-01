@@ -341,7 +341,7 @@ export function PostMenu({
         </button>
 
         {menuOpen && (
-          <div className="absolute right-0 top-full mt-1 w-44 bg-[#232525] border border-[#303232] py-1 z-50 animate-in fade-in zoom-in-95 duration-100">
+          <div className="absolute right-0 top-full mt-1 w-44 bg-[#232525] border border-[#303232] rounded-xl shadow-2xl py-1 z-50 animate-in fade-in zoom-in-95 duration-100">
             {/* Owner Actions: Edit & Delete */}
             {isOwner && (
               <>
@@ -472,13 +472,13 @@ export function PostMenu({
             if (e.target === e.currentTarget) setIsEditOpen(false);
           }}
         >
-          <div className="w-full max-w-lg bg-[#232525] border border-[#303232] p-5 sm:p-6 space-y-4">
+          <div className="w-full max-w-lg bg-[#232525] border border-[#303232] rounded-2xl p-5 sm:p-6 space-y-4 shadow-2xl">
             <div className="flex items-center justify-between border-b border-[#303232] pb-3">
               <h3 className="font-heading text-lg text-[#E6E6E6]">Edit Post</h3>
               <button
                 type="button"
                 onClick={() => setIsEditOpen(false)}
-                className="p-1 text-[#A8A8A8] hover:text-[#E6E6E6] transition-colors cursor-pointer"
+                className="p-1 text-[#A8A8A8] hover:text-[#E6E6E6] rounded-lg hover:bg-[#2E3030] transition-colors cursor-pointer"
                 aria-label="Close edit"
               >
                 <X size={18} strokeWidth={1.5} />
@@ -486,7 +486,7 @@ export function PostMenu({
             </div>
 
             {editError && (
-              <div className="p-3 bg-red-950/40 border border-red-500/50 text-xs text-red-300">
+              <div className="p-3 bg-red-950/40 border border-red-500/50 rounded-lg text-xs text-red-300">
                 {editError}
               </div>
             )}
@@ -502,7 +502,7 @@ export function PostMenu({
                   required
                   value={editTitle}
                   onChange={(e) => setEditTitle(e.target.value)}
-                  className="w-full px-3 py-2 text-sm bg-[#1C1E1E] border border-[#303232] text-[#E6E6E6] focus:border-[#6C86FF] focus:outline-none"
+                  className="w-full px-3 py-2 text-sm bg-[#1C1E1E] border border-[#303232] rounded-lg text-[#E6E6E6] focus:border-[#6C86FF] focus:outline-none"
                   placeholder="Post title"
                 />
               </div>
@@ -516,7 +516,7 @@ export function PostMenu({
                   required
                   value={editCategory}
                   onChange={(e) => setEditCategory(e.target.value)}
-                  className="w-full px-3 py-2 text-sm bg-[#1C1E1E] border border-[#303232] text-[#E6E6E6] focus:border-[#6C86FF] focus:outline-none"
+                  className="w-full px-3 py-2 text-sm bg-[#1C1E1E] border border-[#303232] rounded-lg text-[#E6E6E6] focus:border-[#6C86FF] focus:outline-none"
                 >
                   <option value="" disabled>
                     Select channel
@@ -540,7 +540,7 @@ export function PostMenu({
                   maxLength={160}
                   value={editCaption}
                   onChange={(e) => setEditCaption(e.target.value)}
-                  className="w-full px-3 py-2 text-sm bg-[#1C1E1E] border border-[#303232] text-[#E6E6E6] focus:border-[#6C86FF] focus:outline-none resize-none"
+                  className="w-full px-3 py-2 text-sm bg-[#1C1E1E] border border-[#303232] rounded-lg text-[#E6E6E6] focus:border-[#6C86FF] focus:outline-none resize-none"
                   placeholder="Optional short caption..."
                 />
               </div>
@@ -555,7 +555,7 @@ export function PostMenu({
                     rows={6}
                     value={editBody}
                     onChange={(e) => setEditBody(e.target.value)}
-                    className="w-full px-3 py-2 text-sm bg-[#1C1E1E] border border-[#303232] text-[#E6E6E6] focus:border-[#6C86FF] focus:outline-none leading-relaxed"
+                    className="w-full px-3 py-2 text-sm bg-[#1C1E1E] border border-[#303232] rounded-lg text-[#E6E6E6] focus:border-[#6C86FF] focus:outline-none leading-relaxed"
                     placeholder="Body content..."
                   />
                 </div>
@@ -567,14 +567,14 @@ export function PostMenu({
                   type="button"
                   onClick={() => setIsEditOpen(false)}
                   disabled={isSavingEdit}
-                  className="px-4 py-2 text-xs font-semibold bg-[#2E3030] hover:bg-[#353838] text-[#E6E6E6] border border-[#303232] transition-colors cursor-pointer"
+                  className="px-4 py-2 text-xs font-semibold bg-[#2E3030] hover:bg-[#353838] text-[#E6E6E6] border border-[#303232] rounded-lg transition-colors cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={isSavingEdit}
-                  className="px-4 py-2 text-xs font-semibold bg-[#002EC1] hover:bg-[#1F4BE0] active:bg-[#0021A0] text-[#E6E6E6] transition-colors cursor-pointer flex items-center space-x-1.5 disabled:opacity-50"
+                  className="px-4 py-2 text-xs font-semibold bg-[#002EC1] hover:bg-[#1F4BE0] active:bg-[#0021A0] text-[#E6E6E6] rounded-lg transition-colors cursor-pointer flex items-center space-x-1.5 disabled:opacity-50"
                 >
                   {isSavingEdit && <Loader2 size={13} className="animate-spin" />}
                   <span>{isSavingEdit ? "Saving..." : "Save changes"}</span>
@@ -595,7 +595,7 @@ export function PostMenu({
             if (e.target === e.currentTarget && !isDeleting) setIsDeleteOpen(false);
           }}
         >
-          <div className="w-full max-w-md bg-[#232525] border border-[#303232] p-5 sm:p-6 space-y-4">
+          <div className="w-full max-w-md bg-[#232525] border border-[#303232] rounded-2xl p-5 sm:p-6 space-y-4 shadow-2xl">
             <div className="flex items-center space-x-2.5 text-red-400">
               <AlertTriangle size={18} />
               <h3 className="font-heading text-lg text-[#E6E6E6]">Delete Post</h3>
@@ -607,7 +607,7 @@ export function PostMenu({
             </p>
 
             {deleteError && (
-              <div className="p-3 bg-red-950/40 border border-red-500/50 text-xs text-red-300">
+              <div className="p-3 bg-red-950/40 border border-red-500/50 rounded-lg text-xs text-red-300">
                 {deleteError}
               </div>
             )}
@@ -617,7 +617,7 @@ export function PostMenu({
                 type="button"
                 onClick={() => setIsDeleteOpen(false)}
                 disabled={isDeleting}
-                className="px-4 py-2 text-xs font-semibold bg-[#2E3030] hover:bg-[#353838] text-[#E6E6E6] border border-[#303232] transition-colors cursor-pointer"
+                className="px-4 py-2 text-xs font-semibold bg-[#2E3030] hover:bg-[#353838] text-[#E6E6E6] border border-[#303232] rounded-lg transition-colors cursor-pointer"
               >
                 Cancel
               </button>
@@ -625,7 +625,7 @@ export function PostMenu({
                 type="button"
                 onClick={handleConfirmDelete}
                 disabled={isDeleting}
-                className="px-4 py-2 text-xs font-semibold bg-red-900 hover:bg-red-800 text-red-100 transition-colors cursor-pointer flex items-center space-x-1.5 disabled:opacity-50"
+                className="px-4 py-2 text-xs font-semibold bg-red-900 hover:bg-red-800 text-red-100 rounded-lg transition-colors cursor-pointer flex items-center space-x-1.5 disabled:opacity-50"
               >
                 {isDeleting && <Loader2 size={13} className="animate-spin" />}
                 <span>{isDeleting ? "Deleting..." : "Delete post"}</span>
