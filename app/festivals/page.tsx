@@ -1,21 +1,22 @@
+import type { Metadata } from "next";
 import { AppLayout } from "@/components/shell/AppLayout";
-import { WaitlistForm } from "@/components/waitlist/WaitlistForm";
+import { FestivalList } from "@/components/festivals/FestivalList";
+import { createClient } from "@/lib/supabase/server";
 
-export default function FestivalsPage() {
+export const metadata: Metadata = {
+  title: "Film Festivals | Arkee",
+};
+
+export default async function FestivalsPage() {
+  const supabase = await createClient();
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
   return (
-    <AppLayout title="Festivals">
-      <div className="bg-[#232525] border border-[#303232] p-7 space-y-4 rounded-2xl shadow-lg">
-        <h2 className="font-heading text-2xl sm:text-3xl tracking-tight text-[#E6E6E6]">
-          Festivals
-        </h2>
-        <p className="text-sm text-[#A8A8A8] leading-relaxed">
-          Submissions, screenings, and awards opening soon. Join the early access list.
-        </p>
-
-        <div className="pt-2">
-          <WaitlistForm feature="festivals" />
-        </div>
-      </div>
+    <AppLayout title="Film Festivals">
+      <FestivalList currentUserId={user?.id || null} />
     </AppLayout>
   );
 }
