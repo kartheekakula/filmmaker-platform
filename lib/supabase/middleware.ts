@@ -50,7 +50,9 @@ export async function updateSession(request: NextRequest) {
     pathname.startsWith("/settings") ||
     pathname.startsWith("/onboarding") ||
     pathname === "/post" ||
-    pathname.startsWith("/admin");
+    pathname.startsWith("/admin") ||
+    pathname === "/collaborate/new" ||
+    pathname.startsWith("/collaborate/mine");
 
   if (isProtected && !user) {
     const loginUrl = new URL("/login", request.url);

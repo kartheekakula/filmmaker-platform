@@ -1,21 +1,30 @@
+import type { Metadata } from "next";
 import { AppLayout } from "@/components/shell/AppLayout";
-import { WaitlistForm } from "@/components/waitlist/WaitlistForm";
+import { CollabList } from "@/components/collab/CollabList";
+import { createClient } from "@/lib/supabase/server";
 
-export default function CollaboratePage() {
+export const metadata: Metadata = {
+  title: "Collaborate | Arkee",
+};
+
+export default async function CollaboratePage() {
+  const supabase = await createClient();
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  let isRestricted = false;
+  if (user) {
+    const { data: restricted } = await supabase.rpc("is_restricted", {
+      uid: user.id,
+    });
+    isRestricted = !!restricted;
+  }
+
   return (
     <AppLayout title="Collaborate">
-      <div className="bg-[#232525] border border-[#303232] p-7 space-y-4 rounded-2xl shadow-lg">
-        <h2 className="font-heading text-2xl sm:text-3xl tracking-tight text-[#E6E6E6]">
-          Collaborate
-        </h2>
-        <p className="text-sm text-[#A8A8A8] leading-relaxed">
-          Connect with artists, directors, writers, and performers. Join the pilot creator group.
-        </p>
-
-        <div className="pt-2">
-          <WaitlistForm feature="collaborate" />
-        </div>
-      </div>
+      <CollabList currentUserId={user?.id || null} isRestricted={isRestricted} />
     </AppLayout>
   );
 }
