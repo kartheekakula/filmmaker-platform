@@ -49,14 +49,23 @@ create table if not exists public.collab_requests (
   apply_by date,
   status text not null default 'open' check (status in ('open', 'closed')),
   is_hidden boolean not null default false,
-  applicant_count integer not null default 0 check (applicant_count >= 0),
-  constraint collab_requests_city_check check (
-    (work_mode = 'remote') or (city is not null and char_length(trim(city)) > 0)
-  ),
-  constraint collab_requests_skills_check check (
-    public.validate_collab_skills(skills)
-  )
+  applicant_count integer not null default 0 check (applicant_count >= 0)
 );
+
+-- Ensure table constraints exist idempotently
+do $$
+begin
+  if not exists (select 1 from pg_constraint where conname = 'collab_requests_city_check') then
+    alter table public.collab_requests add constraint collab_requests_city_check check (
+      (work_mode = 'remote') or (city is not null and char_length(trim(city)) > 0)
+    );
+  end if;
+  if not exists (select 1 from pg_constraint where conname = 'collab_requests_skills_check') then
+    alter table public.collab_requests add constraint collab_requests_skills_check check (
+      public.validate_collab_skills(skills)
+    );
+  end if;
+end $$;
 
 -- Indexes
 create index if not exists idx_collab_requests_status_created on public.collab_requests(status, created_at desc, id desc);
@@ -290,13 +299,24 @@ create table if not exists public.festivals (
   tags text[] default '{}',
   website_url text not null check (website_url ~* '^https://'),
   submit_url text check (submit_url is null or submit_url ~* '^https://'),
-  is_published boolean not null default true,
-  constraint festivals_city_check check (
-    (work_mode = 'online') or (city is not null and char_length(trim(city)) > 0)
-  ),
-  constraint festivals_dates_check check (ends_on >= starts_on),
-  constraint festivals_tags_check check (public.validate_festival_tags(tags))
+  is_published boolean not null default true
 );
+
+-- Ensure table constraints exist idempotently
+do $$
+begin
+  if not exists (select 1 from pg_constraint where conname = 'festivals_city_check') then
+    alter table public.festivals add constraint festivals_city_check check (
+      (work_mode = 'online') or (city is not null and char_length(trim(city)) > 0)
+    );
+  end if;
+  if not exists (select 1 from pg_constraint where conname = 'festivals_dates_check') then
+    alter table public.festivals add constraint festivals_dates_check check (ends_on >= starts_on);
+  end if;
+  if not exists (select 1 from pg_constraint where conname = 'festivals_tags_check') then
+    alter table public.festivals add constraint festivals_tags_check check (public.validate_festival_tags(tags));
+  end if;
+end $$;
 
 create index if not exists idx_festivals_published_submit on public.festivals(is_published, submit_by);
 create index if not exists idx_festivals_published_starts on public.festivals(is_published, starts_on);
