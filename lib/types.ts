@@ -123,3 +123,109 @@ export interface Comment {
   };
 }
 
+export type WorkMode = "remote" | "in_person" | "hybrid";
+export type PayType = "paid" | "unpaid";
+export type CollabStatus = "open" | "closed";
+
+export interface CollabRequest {
+  id: string;
+  owner_id: string;
+  created_at: string;
+  title: string;
+  role_slug: string;
+  body: string;
+  work_mode: WorkMode;
+  city: string | null;
+  pay_type: PayType;
+  pay_note: string | null;
+  duration_text: string | null;
+  skills: string[];
+  apply_by: string | null;
+  status: CollabStatus;
+  is_hidden: boolean;
+  applicant_count: number;
+  owner_username?: string;
+  owner_display_name?: string;
+  owner_avatar_url?: string | null;
+  is_saved?: boolean;
+  has_applied?: boolean;
+}
+
+export interface CollabRequestInput {
+  title: string;
+  role_slug: string;
+  body: string;
+  work_mode: WorkMode;
+  city?: string | null;
+  pay_type?: PayType;
+  pay_note?: string | null;
+  duration_text?: string | null;
+  skills?: string[];
+  apply_by?: string | null;
+}
+
+export interface CollabApplicationItem {
+  collab_id: string;
+  applicant_id: string;
+  note: string | null;
+  created_at: string;
+  applicant: {
+    id: string;
+    username: string;
+    display_name: string;
+    headline: string | null;
+    avatar_url: string | null;
+    links: Record<string, string> | null;
+  };
+}
+
+export interface MyCollabItem extends CollabRequest {
+  application_note?: string | null;
+  application_created_at?: string;
+}
+
+export type FestivalKind = "festival" | "screening" | "workshop";
+export type FestivalWorkMode = "online" | "in_person" | "hybrid";
+export type FestivalTab = "open" | "upcoming" | "past";
+
+export interface Festival {
+  id: string;
+  created_at: string;
+  name: string;
+  organiser: string;
+  kind: FestivalKind;
+  work_mode: FestivalWorkMode;
+  city: string | null;
+  starts_on: string;
+  ends_on: string;
+  submit_by: string | null;
+  fee_text: string | null;
+  student_friendly: boolean;
+  description: string | null;
+  tags: string[];
+  website_url: string;
+  submit_url: string | null;
+  is_published: boolean;
+  is_saved?: boolean;
+  total_count?: number;
+}
+
+export interface FestivalInput {
+  name: string;
+  organiser: string;
+  kind: FestivalKind;
+  work_mode: FestivalWorkMode;
+  city?: string | null;
+  starts_on: string;
+  ends_on: string;
+  submit_by?: string | null;
+  fee_text?: string | null;
+  student_friendly?: boolean;
+  description?: string | null;
+  tags?: string[];
+  website_url: string;
+  submit_url?: string | null;
+  is_published?: boolean;
+}
+
+
