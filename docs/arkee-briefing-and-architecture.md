@@ -40,9 +40,14 @@
 | `/settings/profile` | **Profile Editor** | Update details, manage experience history, upload cropped avatar/banner images, and select featured films. |
 | `/post` | **Create Post** | Multi-format creator (`video`, `writing`, `image`) with channel selector, YouTube validation, runtime check, and live card preview. |
 | `/ai` | **AI Screenplay Review** | Script review tool offering narrative critique, pacing analysis, and scene breakdowns (*Milestone 3*). |
-| `/festivals` | **Festival Hub** | Coming-soon waitlist collecting interest for film festival submission deadlines. |
-| `/collaborate` | **Crew Collaboration** | Coming-soon waitlist for filmmakers seeking crew/collaborators. |
+| `/festivals` | **Festival Hub** | Browse curated film festivals, screenings, and workshops with filters (kind, mode, Open/Upcoming/Past tabs) and bookmarking. |
+| `/festivals/[id]` | **Festival Details** | Detailed view with start/end/submit deadlines, venue details, submission links, and fee info. |
+| `/collaborate` | **Crew Collaboration** | Community board for finding crew/collaborators with role/mode filters, bookmarking, and inline application flow. |
+| `/collaborate/new` | **New Request** | Create collaboration opportunity with role, mode, pay type, duration, and deadline. |
+| `/collaborate/[id]` | **Request Details** | Manage open request, review applicant notes and profile links, or apply as a creator. |
+| `/collaborate/mine` | **My Requests & Applications** | Tabs for requests posted and opportunities applied to. |
 | `/admin` | **Admin Dashboard** | Protected moderation queue for reported posts, hiding flagged content, and restricting bad actors. |
+| `/admin/festivals` | **Admin Festival Manager** | Admin curation board to list, publish, unpublish, edit, create, and delete festival records. |
 | `/login` & `/onboarding` | **Authentication** | Google OAuth and email sign-in; first-time profile creation with unique handle check. |
 
 ---
@@ -131,7 +136,11 @@ The database is built on PostgreSQL with strict Row Level Security (RLS) on ever
 7. **`likes` & `follows`:** Unique relational pairs for tracking engagement with optimistic UI updates.
 8. **`reports` & `restrictions` & `admins`:** Full moderation sub-system. Tracks report reasons (`spam`, `abuse`, `off_topic`), admin status, and restricts banned users from creating content.
 9. **`ai_reviews`:** User script text, structured JSON evaluation output, and provider tracking (`gemini` or `grok`).
-10. **`waitlist`:** Captures interest for future festival and collaboration tools.
+10. **`collab_requests`:** Opportunities for crew/roles (title, role_slug, body, work_mode, city, pay_type, pay_note, duration_text, skills, apply_by, status, applicant_count, is_hidden). Max 3 active per creator.
+11. **`collab_applications`:** Relational pair `(collab_id, applicant_id)` with optional note. RLS protects creator review, applicant privacy, and prevents self-application.
+12. **`collab_saves` & `festival_saves`:** Saved bookmark relations for users.
+13. **`festivals`:** Admin-curated festival, screening, and workshop events (name, organiser, kind, work_mode, city, starts_on, ends_on, submit_by, fee_text, student_friendly, description, tags, website_url, submit_url, is_published).
+14. **`waitlist`:** Historical interest waitlist.
 
 ### Security & Integrity Highlights
 - **Client Tamper Protection:** Authenticated or anon clients **cannot** increment or manipulate `like_count`, `comment_count`, `view_count`, `follower_count`, or `is_hidden` directly. PostgreSQL `BEFORE UPDATE` triggers throw exceptions if any client modifies protected counter columns.
@@ -144,7 +153,8 @@ The database is built on PostgreSQL with strict Row Level Security (RLS) on ever
 
 ## 7. Performance & Engineering Guidelines
 
-- **Cursor Pagination:** All feeds and lists use cursor pagination based on `(created_at, id)`. Full table scans and arbitrary `OFFSET` paging are forbidden.
+- **Cursor Pagination:** Feeds, comments, and Collaborate requests use cursor pagination based on `(created_at, id)`. Full table scans and arbitrary `OFFSET` paging are avoided.
+- **Offset Pagination (Curated Exceptions):** Festivals listing uses offset pagination (`list_festivals`) exclusively because the dataset is strictly admin-curated and small in volume.
 - **Database Indexing:** Compound indexes on `(category_slug, created_at desc)`, `(post_type, created_at desc)`, and foreign key pairs ensure millisecond query times.
 - **Scroll Preview Engine:**
   - An Intersection Observer monitors cards in the feed.

@@ -13,7 +13,7 @@ A platform for creatives to publish microfilms, written works, and design/artwor
 - AI (from M3) behind one function in `lib/ai/review.ts`
 
 ## Routes
-`/` home feed (all channels, newest first), `/popular`, `/explore`, `/c/[slug]` channel feed, `/f/[id]` film/post, `/u/[username]` profile, `/settings/profile` edit profile, `/post`, `/admin`, `/ai`, `/festivals`, `/collaborate`, `/login`, `/onboarding`.
+`/` home feed (all channels, newest first), `/popular`, `/explore`, `/c/[slug]` channel feed, `/f/[id]` film/post, `/u/[username]` profile, `/settings/profile` edit profile, `/post`, `/admin`, `/admin/festivals`, `/admin/festivals/new`, `/admin/festivals/[id]`, `/ai`, `/festivals`, `/festivals/[id]`, `/collaborate`, `/collaborate/new`, `/collaborate/[id]`, `/collaborate/mine`, `/login`, `/onboarding`.
 
 ## Design system (mobile first, minimal, quiet, in the spirit of Reddit, Medium and Substack's dark look)
 - **Layout:** top bar with a hamburger (left, opens the channel drawer), a title (Home or the channel name) and a square profile avatar (right, opens the profile menu). Film cards in a single feed column. Fixed bottom tab bar with four tabs: Film Festivals, Collaborate, Post, AI feedback. Post is the only filled blue element in the bar. On desktop the drawer becomes a persistent left sidebar (240px) and the feed column is centred (max 680px).
@@ -52,6 +52,10 @@ RLS on every table.
 - Admin actions via SECURITY DEFINER RPCs only: `admin_set_post_hidden`, `admin_dismiss_reports`, `admin_set_user_restricted` (cannot restrict self or admin), `admin_delete_comment`, `admin_report_queue`.
 - `comments`: readable by everyone. Insert and delete only by author (`auth.uid() = author_id`), or deleted by admins via `admin_delete_comment`.
 - `ai_reviews`: owner can read and insert only.
+- `collab_requests`: select if not hidden, owned by viewer (`auth.uid() = owner_id`), or viewer is admin (`public.is_admin()`). Insert only as yourself when not restricted (`not public.is_restricted(auth.uid())`) and under 3 open requests. Update/delete only by owner. Admin hide via `admin_set_collab_hidden`.
+- `collab_applications`: insert only as yourself, not restricted, not own request, request open, not hidden, and not past `apply_by`. Select own rows, owner sees all on their request, admin sees all. Delete only by applicant (withdraw).
+- `collab_saves` and `festival_saves`: select, insert, delete only own rows (`auth.uid() = user_id`).
+- `festivals`: select if published (`is_published = true`) or viewer is admin. Insert, update, delete only by admin (`public.is_admin()`).
 - `waitlist` and `events`: anyone can insert, nobody can read from the client.
 - Storage buckets `avatars`, `banners`, and `post-images`: public read, write only inside the folder named after the user's id, images only, 2 MB (avatars) and 4 MB (banners, post-images) limits.
 - The Supabase secret key (`sb_secret_...`) and AI keys live only in server environment variables, and the secret key is used only if a task truly needs it (ask first). The browser uses the publishable key (`sb_publishable_...`), which is safe to expose because RLS guards the data. Every API route verifies the user and validates input.
@@ -69,6 +73,11 @@ RLS on every table.
 - `restrictions`: user_id (primary key references profiles(id) on delete cascade), created_by, created_at
 - `reports`: id, film_id (references films), reporter_id (references profiles), reason ('spam' | 'off_topic' | 'abuse' | 'other'), status ('open' | 'dismissed' | 'actioned' default 'open'), created_at. Unique on (film_id, reporter_id). Indexes on (status, film_id) and reporter_id
 - `ai_reviews`: id, user_id, script_text, result jsonb, provider, created_at
+- `collab_requests`: id, owner_id, created_at, title (3 to 80), role_slug (references categories), body (10 to 600), work_mode ('remote' | 'in_person' | 'hybrid'), city (required when not remote), pay_type ('paid' | 'unpaid'), pay_note, duration_text, skills text[] (max 5, max 24 chars each), apply_by date, status ('open' | 'closed'), is_hidden boolean default false, applicant_count integer default 0. Indexes on (status, created_at desc, id desc), (role_slug, created_at desc), and (owner_id)
+- `collab_applications`: collab_id, applicant_id, note (max 300), created_at. PK on (collab_id, applicant_id), index on applicant_id
+- `collab_saves`: user_id, collab_id, created_at. PK on (user_id, collab_id)
+- `festivals`: id, created_at, name (3 to 100), organiser, kind ('festival' | 'screening' | 'workshop'), work_mode ('online' | 'in_person' | 'hybrid'), city (required when not online), starts_on date, ends_on date, submit_by date, fee_text, student_friendly boolean default false, description (max 600), tags text[] (max 5, max 24 chars each), website_url, submit_url, is_published boolean default true. Indexes on (is_published, submit_by) and (is_published, starts_on)
+- `festival_saves`: user_id, festival_id, created_at. PK on (user_id, festival_id)
 - `waitlist`: id, email, feature ('festivals' or 'collaborate'), created_at
 - `events`: id, user_id nullable, name, props jsonb, created_at
 - Database triggers keep `follower_count`, `following_count`, `like_count`, and `comment_count` correct.
@@ -86,4 +95,4 @@ Primary Gemini, fallback Grok (xAI, OpenAI-compatible API). Fall back on a 20 se
 - Finish with: what was built, what was not built, how to test it manually.
 
 ## Out of scope
-Votes, communities beyond channels, direct messages, connection requests, payments, producer accounts, festival pages beyond a coming-soon screen, AI video analysis, native app, the ASCII front page (later milestone).
+Votes, communities beyond channels, direct messages, connection requests, payments, producer accounts, AI video analysis, native app, the ASCII front page (later milestone).
