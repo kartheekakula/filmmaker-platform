@@ -435,7 +435,7 @@ begin
     r.status,
     r.is_hidden,
     r.applicant_count,
-    p.username as owner_username,
+    p.username::text as owner_username,
     p.display_name as owner_display_name,
     p.avatar_url as owner_avatar_url,
     case
