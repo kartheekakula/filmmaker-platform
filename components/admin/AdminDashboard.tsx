@@ -460,6 +460,14 @@ export function AdminDashboard() {
           </div>
 
           <div className="flex items-center space-x-2">
+            {/* Festivals Management Link */}
+            <Link
+              href="/admin/festivals"
+              className="px-3 py-1 text-xs font-mono text-[#6C86FF] hover:underline border border-[#303232] rounded-lg hover:bg-[#2E3030] transition-colors"
+            >
+              Festivals
+            </Link>
+
             {/* Timeframe selector */}
             <div className="flex border border-[#303232] bg-[#1C1E1E]">
               {(["24h", "7d", "30d", "all"] as AdminTimeframe[]).map((tf) => (
